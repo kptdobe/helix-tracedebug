@@ -5,16 +5,17 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 import ErrorBoundary from 'react-error-boundary'
+import { browserHistory } from 'react-router'
 
-import Button from '@react/react-spectrum/Button';
-import Heading from '@react/react-spectrum/Heading';
-import InputGroup from '@react/react-spectrum/InputGroup';
-import Label from '@react/react-spectrum/Label';
-import OverlayTrigger from '@react/react-spectrum/OverlayTrigger';
-import Popover from '@react/react-spectrum/Popover';
-import {Table, TR, TD, TH, THead, TBody} from '@react/react-spectrum/Table';
-import Textfield from '@react/react-spectrum/Textfield';
-import Tooltip from '@react/react-spectrum/Tooltip';
+import Button from '@react/react-spectrum/Button'
+import Heading from '@react/react-spectrum/Heading'
+import InputGroup from '@react/react-spectrum/InputGroup'
+import Label from '@react/react-spectrum/Label'
+import OverlayTrigger from '@react/react-spectrum/OverlayTrigger'
+import Popover from '@react/react-spectrum/Popover'
+import {Table, TR, TD, TH, THead, TBody} from '@react/react-spectrum/Table'
+import Textfield from '@react/react-spectrum/Textfield'
+import Tooltip from '@react/react-spectrum/Tooltip'
 
 import ReactJson from 'react-json-view'
 
@@ -43,10 +44,11 @@ export default class App extends React.Component {
       </React.Fragment>
     )
 
-    this.handleChange = this.handleChange.bind(this);
+    this.handleChange = this.handleChange.bind(this)
+    this.componentDidMount = this.componentDidMount.bind(this)
 
     this.state = {
-      id: ''
+      id: new URL(window.location.href).hash.slice(1)
     }
 
     console.debug('runtime object:', this.props.runtime)
@@ -78,7 +80,7 @@ export default class App extends React.Component {
       // store the response
       this.setState({ response , errorMsg: '' })
 
-      let spans = response.spans;
+      let spans = response.spans
 
       this.setState({ spans })
 
@@ -90,13 +92,13 @@ export default class App extends React.Component {
   }
 
   handleChange(name, value) {
-    this.setState({[name]: value});
+    this.setState({[name]: value})
   }
 
   getViewParams(params) {
     if (params) {
       const list = Object.keys(params).map((k) => {
-        const v = params[k];
+        const v = params[k]
         if (!(v instanceof Object)) {
           return (
             <li key={k}>{`${k}: ${v}`}</li>
@@ -116,7 +118,7 @@ export default class App extends React.Component {
   getViewResponse(response) {
     if (response) {
       const list = Object.keys(response).map((k) => {
-        const v = response[k];
+        const v = response[k]
         if (!(v instanceof Object)) {
           return (
             <li key={k}>{`${k}: ${v}`}</li>
@@ -145,6 +147,17 @@ export default class App extends React.Component {
     return <span>No logs</span>
   }
 
+  search() {
+    this.invoke('tracedebug', { 'id': this.state.id})
+  }
+
+  componentDidMount() {
+    console.log('componentDidMount', this.state.id)
+    if (this.state.id) {
+      this.search()
+    }
+  }
+
   render () {
     return (
       // ErrorBoundary wraps child components to handle eventual rendering errors
@@ -158,7 +171,7 @@ export default class App extends React.Component {
             <InputGroup>
               <Label>Activation ID or URL</Label>
               <Textfield id="id" name="id" value={this.state.id} onChange={v => this.handleChange('id', v)}/>
-              <Button onClick={ this.invoke.bind(this, 'tracedebug', { 'id': this.state.id}) }>Search</Button>
+              <Button onClick={ this.search.bind(this) }>Search</Button>
             </InputGroup>
               { this.state.errorMsg &&
                 <Tooltip variant="error">
@@ -210,12 +223,12 @@ export default class App extends React.Component {
                       const indentClassName = `indent${span.level}`
                       const espagonLink = `https://dashboard.epsagon.com/spans/${span.spanId}`
                       const coralogixLink = `https://helix.coralogix.com/#/query/logs?query=${span.activationId}`
-                      const hasParams = span.params && Object.keys(span.params).length > 0;
-                      const paramsButtonLabel = `${span.params ? Object.keys(span.params).length : ''} params`;
+                      const hasParams = span.params && Object.keys(span.params).length > 0
+                      const paramsButtonLabel = `${span.params ? Object.keys(span.params).length : ''} params`
 
-                      const hasResponse = !!span.response;
-                      const hasLogs = span.logs && span.logs.length > 0;
-                      const logsButtonLabel = `${span.logs ? span.logs.length : ''} logs`;
+                      const hasResponse = !!span.response
+                      const hasLogs = span.logs && span.logs.length > 0
+                      const logsButtonLabel = `${span.logs ? span.logs.length : ''} logs`
 
                       return <TR key={index}>
                         <TD className={indentClassName}>{span.name}</TD>

@@ -1,6 +1,6 @@
 {
   "name": "helix-tracedebug",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "dependencies": {
     "@adobe/aio-sdk": "^2.0.0",
     "@react-spectrum/button": "^3.0.0-rc.2",
@@ -12,7 +12,6 @@
     "core-js": "^3.6.4",
     "node-fetch": "^2.6.0",
     "react": "^16.13.1",
-    "react-chartjs-2": "^2.9.0",
     "react-dom": "^16.13.1",
     "react-error-boundary": "^1.2.5",
     "react-json-view": "^1.19.1",
