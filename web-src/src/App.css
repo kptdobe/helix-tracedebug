@@ -1,0 +1,48 @@
+/*
+* <license header>
+*/
+
+.page-content { 
+  display:-ms-flexbox;
+  display:flex;
+  -ms-flex:1 0 auto;
+  flex:1 0 auto;
+  -ms-flex-pack:center;
+  justify-content:center;
+  overflow:auto
+}
+
+.main {
+  width: 100%;
+  min-height: 800px;
+  margin: 10px 20px;
+}
+
+#id {
+  width: 800px
+}
+
+.indent1 {
+  padding-left: 16px;
+}
+
+.indent1 {
+  padding-left: 28px;
+}
+.indent2 {
+  padding-left: 40px;
+}
+.indent3 {
+  padding-left: 52px;
+}
+.indent4 {
+  padding-left: 64px;
+}
+
+.custom-icon {
+  width: 30px;
+}
+
+.react-json-view {
+  background-color: white !important;
+}

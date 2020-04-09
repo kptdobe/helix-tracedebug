@@ -1,0 +1,15 @@
+packages:
+  __APP_PACKAGE__:
+    license: Apache-2.0
+    actions:
+      tracedebug:
+        function: actions/tracedebug/index.js
+        web: 'yes'
+        runtime: 'nodejs:10'
+        inputs:
+          LOG_LEVEL: debug
+          EPSAGON_API_TOKEN: $EPSAGON_API_TOKEN
+          CORALOGIX_API_TOKEN: $CORALOGIX_API_TOKEN
+        annotations:
+          require-adobe-auth: false
+          final: true
