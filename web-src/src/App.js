@@ -5,7 +5,6 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 import ErrorBoundary from 'react-error-boundary'
-import { browserHistory } from 'react-router'
 
 import Button from '@react/react-spectrum/Button'
 import Heading from '@react/react-spectrum/Heading'
@@ -16,8 +15,9 @@ import Popover from '@react/react-spectrum/Popover'
 import {Table, TR, TD, TH, THead, TBody} from '@react/react-spectrum/Table'
 import Textfield from '@react/react-spectrum/Textfield'
 import Tooltip from '@react/react-spectrum/Tooltip'
+import Wait from '@react/react-spectrum/Wait'
 
-import ReactJson from 'react-json-view'
+// import ReactJson from 'react-json-view'
 
 import './App.css'
 
@@ -64,6 +64,7 @@ export default class App extends React.Component {
   }
 
   async invoke (action, params) {
+    this.setState({ loading: true })
     // set the authorization header and org from the ims props object
     const headers = {}
     if (this.props.ims.token) {
@@ -77,6 +78,8 @@ export default class App extends React.Component {
       const response = await actionWebInvoke(action, headers, params)
       console.log(`Response from ${action}:`, response)
 
+      this.setState({ loading: false })
+
       // store the response
       this.setState({ response , errorMsg: '' })
 
@@ -85,6 +88,7 @@ export default class App extends React.Component {
       this.setState({ spans })
 
     } catch (e) {
+      this.setState({ loading: false })
       // log and store any error message
       console.error(e)
       this.setState({ response: null, errorMsg: e.message, spans: null })
@@ -195,6 +199,11 @@ export default class App extends React.Component {
                 <li>the search is limited to the last 7 days</li>
                 <li>URL longer than 70 characters cannot be searched by strict equality, they are then searched by "starts with url" - you may have unexpected results</li>
               </ul>
+
+            {
+              this.state.loading && 
+                <Wait centered size="L" />
+            }
 
             {
               this.state.spans && this.state.spans.length > 0 &&
