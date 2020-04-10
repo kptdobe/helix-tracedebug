@@ -1,15 +1,12 @@
 {
   "name": "helix-tracedebug",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "dependencies": {
     "@adobe/aio-sdk": "^2.0.0",
-    "@react-spectrum/button": "^3.0.0-rc.2",
-    "@react-spectrum/label": "^3.0.0-rc.2",
-    "@react-spectrum/provider": "^3.0.0-rc.2",
-    "@react-spectrum/textfield": "^3.0.0-rc.2",
     "@react/react-spectrum": "^2.29.0",
     "chart.js": "^2.9.3",
     "core-js": "^3.6.4",
+    "moment": "^2.24.0",
     "node-fetch": "^2.6.0",
     "react": "^16.13.1",
     "react-dom": "^16.13.1",

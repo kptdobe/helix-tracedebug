@@ -6,10 +6,13 @@ import React from 'react'
 import PropTypes from 'prop-types'
 import ErrorBoundary from 'react-error-boundary'
 
+import moment from 'moment'
+
 import Button from '@react/react-spectrum/Button'
 import Heading from '@react/react-spectrum/Heading'
 import InputGroup from '@react/react-spectrum/InputGroup'
 import Label from '@react/react-spectrum/Label'
+import Link from '@react/react-spectrum/Link'
 import OverlayTrigger from '@react/react-spectrum/OverlayTrigger'
 import Popover from '@react/react-spectrum/Popover'
 import {Table, TR, TD, TH, THead, TBody} from '@react/react-spectrum/Table'
@@ -162,6 +165,18 @@ export default class App extends React.Component {
     }
   }
 
+  viewLocaleTime(date) {
+    return moment(date).format('LTS')
+  }
+
+  viewLocaleDate(date) {
+    return moment(date).format('LL')
+  }
+
+  viewUTCTime(date) {
+    return moment(date).utc().format('HH:mm:ss.SSS')
+  }
+
   render () {
     return (
       // ErrorBoundary wraps child components to handle eventual rendering errors
@@ -210,12 +225,15 @@ export default class App extends React.Component {
               <div>
                 <br/>
                 <p>
-                  <span><b>Trace Start:</b> {this.state.spans[0].date}</span>
+                  <span><b>Trace start date:</b> {this.viewLocaleDate(this.state.spans[0].date)}</span>
                   <br/>
-                  <span><b>Duration:</b> {this.state.spans[0].duration / 1000}s</span>
+                  <span><b>Trace start time:</b> {this.viewLocaleTime(this.state.spans[0].date)}</span>
+                  <br/>
+                  <span><b>Total duration:</b> {(this.state.spans[0].duration / 1000000).toFixed(2)}s</span>
                 </p>
                 <Table>
                   <THead>
+                    <TH>Time (UTC)</TH>
                     <TH>Action</TH>
                     <TH>Activation ID</TH>
                     <TH>URL</TH>
@@ -240,9 +258,10 @@ export default class App extends React.Component {
                       const logsButtonLabel = `${span.logs ? span.logs.length : ''} logs`
 
                       return <TR key={index}>
+                        <TD>{this.viewUTCTime(span.date)}</TD>
                         <TD className={indentClassName}>{span.name}</TD>
                         <TD>{span.activationId}</TD>
-                        <TD><a href={span.url}>{span.url}</a></TD>
+                        <TD><Link href={span.url}>{span.url}</Link></TD>
                         <TD>{span.path}</TD>
                         <TD>{span.status}</TD>
                         <TD><a href={espagonLink} target="_new"><img className="custom-icon" src={espagonLogo} alt="View in Epsagon" title="View in Epsagon"/></a></TD>
