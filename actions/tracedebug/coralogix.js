@@ -119,7 +119,45 @@ async function getActivationIdFromURL(url, token, logger) {
     return null
 }
 
+async function getActivationIdFromCDNRequestId(cdnRequestId, token, logger) {
+
+    let query = `(${cdnRequestId}) AND (ow.actionName: "/helix/helix-services-private/dispatch*")`
+
+    // retrieve first dispatch activation with cdn.url = url
+    let response = await fetch(CORALOGIX_API_ENDPOINT, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'token': `${token}`
+        },
+        body: JSON.stringify({
+            'query':{
+                'query_string':{
+                    query
+                }
+            },
+            'sort': [
+                { 'timestamp.keyword': 'desc' }
+            ],
+            'size': '1'
+        }),
+
+    })
+    if (!response.ok) {
+        logger.error('Error while requesting Coralogix API', response.body)
+        throw new Error(`Request to ${CORALOGIX_API_ENDPOINT} failed with status code ${response.status}`)
+    }
+
+    const json = await response.json()
+    if (json && json.hits && json.hits.hits && json.hits.hits.length > 0 && json.hits.hits[0]._source) {
+        return json.hits.hits[0]._source.ow.activationId
+    }
+
+    return null
+}
+
 module.exports = {
     decorateSpans,
-    getActivationIdFromURL
+    getActivationIdFromURL,
+    getActivationIdFromCDNRequestId
 }

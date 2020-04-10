@@ -47,7 +47,7 @@ export default class App extends React.Component {
       </React.Fragment>
     )
 
-    this.handleChange = this.handleChange.bind(this)
+    this.handleIdChange = this.handleIdChange.bind(this)
     this.componentDidMount = this.componentDidMount.bind(this)
 
     this.state = {
@@ -98,8 +98,11 @@ export default class App extends React.Component {
     }
   }
 
-  handleChange(name, value) {
-    this.setState({[name]: value})
+  handleIdChange(value) {
+    this.setState({'id': value})
+    const u = new URL(window.location.href);
+    u.hash = value;
+    window.location.href = u.href;
   }
 
   getViewParams(params) {
@@ -188,8 +191,8 @@ export default class App extends React.Component {
 
             <Heading variant="subtitle1">Enter a activation id or an already requested url</Heading>
             <InputGroup>
-              <Label>Activation ID or URL</Label>
-              <Textfield id="id" name="id" value={this.state.id} onChange={v => this.handleChange('id', v)}/>
+              <Label>Activation ID or URL or CDN-Request-Id</Label>
+              <Textfield id="id" name="id" value={this.state.id} onChange={v => this.handleIdChange(v)}/>
               <Button onClick={ this.search.bind(this) }>Search</Button>
             </InputGroup>
               { this.state.errorMsg &&

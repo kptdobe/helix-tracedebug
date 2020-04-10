@@ -6,7 +6,7 @@ const { Core } = require('@adobe/aio-sdk')
 const { errorResponse, getBearerToken, stringParameters, checkMissingRequestInputs } = require('../utils')
 
 const { getData: getEpsagonData, constructSpans } = require('./epsagon')
-const { decorateSpans, getActivationIdFromURL } = require('./coralogix')
+const { decorateSpans, getActivationIdFromURL, getActivationIdFromCDNRequestId } = require('./coralogix')
 
 
 function isURL(id) {
@@ -16,6 +16,13 @@ function isURL(id) {
   } catch (e) {
     return false
   }
+}
+
+const PATTERN_CDNREQUESTID = /^[\dabcdef]{8}-[\dabcdef]{4}-[\dabcdef]{3}-[\dabcdef]{4}-[\dabcdef]{12}$/gm
+
+function isCDNRequestId(id) {
+  // format like 12345678-90ab-cde-f123-4567890abcbc
+  return id.match(PATTERN_CDNREQUESTID)
 }
 
 // main function that will be executed by Adobe I/O Runtime
@@ -41,14 +48,18 @@ async function main (params) {
     // extract the user Bearer token from the input request parameters
     const token = getBearerToken(params)
 
-    let activationId = params.id
-    if (isURL(activationId)) {
-      activationId = await getActivationIdFromURL(activationId, params.CORALOGIX_API_TOKEN, logger)
+    let id = params.id
+    if (isURL(id)) {
+      id = await getActivationIdFromURL(id, params.CORALOGIX_API_TOKEN, logger)
+    } else {
+      if (isCDNRequestId(id)) {
+        id = await getActivationIdFromCDNRequestId(id, params.CORALOGIX_API_TOKEN, logger)
+      }
     }
 
     let spans = []
-    if (activationId) {
-      const epsagonData = await getEpsagonData(activationId, params.EPSAGON_API_TOKEN, logger)
+    if (id) {
+      const epsagonData = await getEpsagonData(id, params.EPSAGON_API_TOKEN, logger)
       spans = constructSpans(epsagonData)
       spans = await decorateSpans(spans, params.CORALOGIX_API_TOKEN, logger)
     }
