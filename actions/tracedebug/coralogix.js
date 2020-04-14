@@ -121,7 +121,7 @@ async function getActivationIdFromURL(url, token, logger) {
 
 async function getActivationIdFromCDNRequestId(cdnRequestId, token, logger) {
 
-    let query = `(${cdnRequestId}) AND (ow.actionName: "/helix/helix-services-private/dispatch*")`
+    let query = `(actionOptions.params.__ow_headers.x-cdn-request-id: "${cdnRequestId}") AND (ow.actionName: "/helix/helix-services-private/dispatch*")`
 
     // retrieve first dispatch activation with cdn.url = url
     let response = await fetch(CORALOGIX_API_ENDPOINT, {
