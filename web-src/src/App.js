@@ -270,7 +270,7 @@ export default class App extends React.Component {
                         <TD><a href={espagonLink} target="_new"><img className="custom-icon" src={espagonLogo} alt="View in Epsagon" title="View in Epsagon"/></a></TD>
                         <TD><a href={coralogixLink} target="_new"><img className="custom-icon" src={coralogixLogo} alt="View in Coralogix" title="View in Coralogix"/></a></TD>
                         <TD> { hasParams &&
-                            <OverlayTrigger placement="right">
+                            <OverlayTrigger placement="left">
                               <Button label={paramsButtonLabel} variant="primary" />
                               <Popover title="Action parameters" variant="default">
                                 { this.getViewParams(span.params) }
@@ -279,7 +279,7 @@ export default class App extends React.Component {
                           }
                         </TD>
                         <TD> { hasResponse &&
-                            <OverlayTrigger placement="right">
+                            <OverlayTrigger placement="left">
                               <Button label="Response" variant="primary" />
                               <Popover title="Action response" variant="default">
                                 { this.getViewResponse(span.response) }
@@ -288,7 +288,7 @@ export default class App extends React.Component {
                           }
                         </TD>
                         <TD> { hasLogs && 
-                          <OverlayTrigger placement="right">
+                          <OverlayTrigger placement="left">
                             <Button label={logsButtonLabel} variant="primary" />
                             <Popover title="Action logs" variant="default">
                               { this.getViewLogs(span.logs) }
