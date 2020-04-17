@@ -81,10 +81,10 @@ async function getActivationIdFromURL(url, token, logger) {
 
     const href = new URL(url).href
 
-    let query = `(cdn.url.keyword: "${href}") AND (ow.actionName: "/helix/helix-services-private/dispatch*")`
+    let query = `(cdn.url.keyword: "${href}") AND (ow.actionName: "/helix/helix-services/dispatch*")`
     if (href.length > 70) {
         // keyword is limited to 70 characters, prefer standard search then
-        query = `(cdn.url: "${href}") AND (ow.actionName: "/helix/helix-services-private/dispatch*")`
+        query = `(cdn.url: "${href}") AND (ow.actionName: "/helix/helix-services/dispatch*")`
     }
     // retrieve first dispatch activation with cdn.url = url
     let response = await fetch(CORALOGIX_API_ENDPOINT, {
@@ -121,7 +121,7 @@ async function getActivationIdFromURL(url, token, logger) {
 
 async function getActivationIdFromCDNRequestId(cdnRequestId, token, logger) {
 
-    let query = `(actionOptions.params.__ow_headers.x-cdn-request-id: "${cdnRequestId}") AND (ow.actionName: "/helix/helix-services-private/dispatch*")`
+    let query = `(actionOptions.params.__ow_headers.x-cdn-request-id: "${cdnRequestId}") AND (ow.actionName: "/helix/helix-services/dispatch*")`
 
     // retrieve first dispatch activation with cdn.url = url
     let response = await fetch(CORALOGIX_API_ENDPOINT, {
