@@ -46,3 +46,7 @@
 .react-json-view {
   background-color: white !important;
 }
+
+.spectrum-Dialog-content ul { 
+  max-width: 1000px;
+}

@@ -1,6 +1,6 @@
 {
   "name": "helix-tracedebug",
-  "version": "0.0.7",
+  "version": "0.0.8",
   "dependencies": {
     "@adobe/aio-sdk": "^2.0.0",
     "@react/react-spectrum": "^2.29.0",
