@@ -169,7 +169,7 @@ export default class App extends React.Component {
   }
 
   viewLocaleTime(date) {
-    return moment(date).format('LTS')
+    return moment(date).format('HH:mm:ss.SSS')
   }
 
   viewLocaleDate(date) {
@@ -228,9 +228,9 @@ export default class App extends React.Component {
               <div>
                 <br/>
                 <p>
-                  <span><b>Trace start date:</b> {this.viewLocaleDate(this.state.spans[0].date)}</span>
+                  <span><b>Trace start date (local):</b> {this.viewLocaleDate(this.state.spans[0].date)}</span>
                   <br/>
-                  <span><b>Trace start time:</b> {this.viewLocaleTime(this.state.spans[0].date)}</span>
+                  <span><b>Trace start time (local):</b> {this.viewLocaleTime(this.state.spans[0].date)}</span>
                   <br/>
                   <span><b>Total duration:</b> {(this.state.spans[0].duration / 1000000).toFixed(2)}s</span>
                 </p>
@@ -252,22 +252,25 @@ export default class App extends React.Component {
                     { this.state.spans.map((span, index) => {
                       const indentClassName = `indent${span.level}`
                       const espagonLink = `https://dashboard.epsagon.com/spans/${span.spanId}`
-                      const coralogixLink = `https://helix.coralogix.com/#/query/logs?query=${span.activationId}`
+                      const coralogixLink = `https://helix.coralogix.com/#/query/logs?query=${span.activationId || this.state.id}`
                       const hasParams = span.params && Object.keys(span.params).length > 0
                       const paramsButtonLabel = `${span.params ? Object.keys(span.params).length : ''} params`
 
                       const hasResponse = !!span.response
                       const hasLogs = span.logs && span.logs.length > 0
                       const logsButtonLabel = `${span.logs ? span.logs.length : ''} logs`
-
-                      return <TR key={index}>
+                      const errorClassName = span.status >= 500 ? 'error' : ''
+                      return <TR key={index} className={errorClassName}>
                         <TD>{this.viewUTCTime(span.date)}</TD>
                         <TD className={indentClassName}>{span.name}</TD>
                         <TD>{span.activationId}</TD>
                         <TD><Link href={span.url}>{span.url}</Link></TD>
                         <TD>{span.path}</TD>
                         <TD>{span.status}</TD>
-                        <TD><a href={espagonLink} target="_new"><img className="custom-icon" src={espagonLogo} alt="View in Epsagon" title="View in Epsagon"/></a></TD>
+                        <TD>  { span.spanId &&
+                          <a href={espagonLink} target="_new"><img className="custom-icon" src={espagonLogo} alt="View in Epsagon" title="View in Epsagon"/></a>
+                        }
+                        </TD>
                         <TD><a href={coralogixLink} target="_new"><img className="custom-icon" src={coralogixLogo} alt="View in Coralogix" title="View in Coralogix"/></a></TD>
                         <TD> { hasParams &&
                             <OverlayTrigger placement="left">

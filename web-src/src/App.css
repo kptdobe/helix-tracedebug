@@ -50,3 +50,7 @@
 .spectrum-Dialog-content ul { 
   max-width: 1000px;
 }
+
+tr.error {
+  background-color: #880000 !important;
+}
