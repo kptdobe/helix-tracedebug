@@ -1,29 +1,12 @@
 /*
 * <license header>
 */
-const { URL }  = require('url')
+
 const { Core } = require('@adobe/aio-sdk')
 const { errorResponse, getBearerToken, stringParameters, checkMissingRequestInputs } = require('../utils')
 
 const { getData: getEpsagonData, constructSpans } = require('./epsagon')
-const { decorateSpans, getActivationIdFromURL, getActivationIdFromCDNRequestId } = require('./coralogix')
-
-
-function isURL(id) {
-  try {
-    new URL(id)
-    return true
-  } catch (e) {
-    return false
-  }
-}
-
-const PATTERN_CDNREQUESTID = /^[\dabcdef]{8}-[\dabcdef]{4}-[\dabcdef]{3}-[\dabcdef]{4}-[\dabcdef]{12}$/gm
-
-function isCDNRequestId(id) {
-  // format like 12345678-90ab-cde-f123-4567890abcbc
-  return id.match(PATTERN_CDNREQUESTID)
-}
+const { getRootSpan, decorateSpans } = require('./coralogix')
 
 // main function that will be executed by Adobe I/O Runtime
 async function main (params) {
@@ -48,20 +31,18 @@ async function main (params) {
     // extract the user Bearer token from the input request parameters
     const token = getBearerToken(params)
 
-    let id = params.id
-    if (isURL(id)) {
-      id = await getActivationIdFromURL(id, params.CORALOGIX_API_TOKEN, logger)
-    } else {
-      if (isCDNRequestId(id)) {
-        id = await getActivationIdFromCDNRequestId(id, params.CORALOGIX_API_TOKEN, logger)
-      }
-    }
-
+    const root = await getRootSpan(params.id, params.CORALOGIX_API_TOKEN, logger)
+    
     let spans = []
-    if (id) {
-      const epsagonData = await getEpsagonData(id, params.EPSAGON_API_TOKEN, logger)
-      spans = constructSpans(epsagonData)
-      spans = await decorateSpans(spans, params.CORALOGIX_API_TOKEN, logger)
+    if (root) {
+      if (!root.empty) {
+        spans.push(root);
+      }
+      if (root.pivotActivationId) {
+        const epsagonData = await getEpsagonData(root.pivotActivationId, params.EPSAGON_API_TOKEN, logger)
+        spans = spans.concat(constructSpans(epsagonData))
+        spans = await decorateSpans(spans, params.CORALOGIX_API_TOKEN, logger)
+      }
     }
 
     const response = {
