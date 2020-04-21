@@ -15,9 +15,6 @@ async function getData(id, token, logger) {
         }],
         'time_frame': {
             'type': 'last_week',
-            'frequency': 86400,
-            'from': new Date(currentTime - 1000 * 60 * 60 * 24 * 7).getTime(),
-            'to': currentTime
         },
         'sort': {
             'by': 'start_time',
@@ -94,23 +91,23 @@ function constructSpans(data) {
     if (data && data.spans) {
         // construct spans list
         data.spans.forEach(container => {
-        container.spans.forEach((span) => {
-            spans.push({
-            duration: span.duration,
-            error: span.error,
-            activationId: span.tags.activation_id,
-            name: container.name,
-            operation: span.operation_name,
-            spanId: span.span_id,
-            timestamp: span.start_time * 1000,
-            date: new Date(span.start_time * 1000),
-            params: span.tags.params,
-            path: span.tags.params && span.tags.params.path ? span.tags.params.path : 'N/A',
-            response: span.tags.response,
-            parentSpanId: span.references.length > 0 ? span.references[0].spanID : null,
-            status: span.tags.response && span.tags.response.result ? span.tags.response.result.statusCode : (span.tags.status ? span.tags.status : 'N/A'),
+            container.spans.forEach((span) => {
+                spans.push({
+                    duration: span.duration,
+                    error: span.error,
+                    activationId: span.tags.activation_id,
+                    name: container.name,
+                    operation: span.operation_name,
+                    spanId: span.span_id,
+                    timestamp: span.start_time * 1000,
+                    date: new Date(span.start_time * 1000),
+                    params: span.tags.params,
+                    path: span.tags.params && span.tags.params.path ? span.tags.params.path : 'N/A',
+                    response: span.tags.response,
+                    parentSpanId: span.references.length > 0 ? span.references[0].spanID : null,
+                    status: span.tags.response && span.tags.response.result ? span.tags.response.result.statusCode : (span.tags.status ? span.tags.status : 'N/A'),
+                })
             })
-        })
         })
 
         const spansList = []
