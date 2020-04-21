@@ -247,18 +247,25 @@ export default class App extends React.Component {
                     <TH>Params</TH>
                     <TH>Response</TH>
                     <TH>Logs</TH>
+                    <TH>Data</TH>
                   </THead>
                   <TBody>
                     { this.state.spans.map((span, index) => {
+                      if (span.invisible) return;
                       const indentClassName = `indent${span.level}`
                       const espagonLink = `https://dashboard.epsagon.com/spans/${span.spanId}`
                       const coralogixLink = `https://helix.coralogix.com/#/query/logs?query=${span.activationId || this.state.id}`
                       const hasParams = span.params && Object.keys(span.params).length > 0
                       const paramsButtonLabel = `${span.params ? Object.keys(span.params).length : ''} params`
 
+                      const hasData = span.data && Object.keys(span.data).length > 0
+                      const dataButtonLabel = `Data`
+
                       const hasResponse = !!span.response
+
                       const hasLogs = span.logs && span.logs.length > 0
-                      const logsButtonLabel = `${span.logs ? span.logs.length : ''} logs`
+                      const logsButtonLabel = `${hasLogs ? span.logs.length : ''} logs`
+
                       const errorClassName = span.status >= 500 ? 'error' : ''
                       return <TR key={index} className={errorClassName}>
                         <TD>{this.viewUTCTime(span.date)}</TD>
@@ -295,6 +302,15 @@ export default class App extends React.Component {
                             <Button label={logsButtonLabel} variant="primary" />
                             <Popover title="Action logs" variant="default">
                               { this.getViewLogs(span.logs) }
+                            </Popover>
+                          </OverlayTrigger>
+                          }
+                        </TD>
+                        <TD> { hasData && 
+                          <OverlayTrigger placement="left">
+                            <Button label={dataButtonLabel} variant="primary" />
+                            <Popover title="Entry data" variant="default">
+                              { this.getViewParams(span.data) }
                             </Popover>
                           </OverlayTrigger>
                           }

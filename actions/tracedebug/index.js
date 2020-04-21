@@ -6,7 +6,7 @@ const { Core } = require('@adobe/aio-sdk')
 const { errorResponse, getBearerToken, stringParameters, checkMissingRequestInputs } = require('../utils')
 
 const { getData: getEpsagonData, constructSpans } = require('./epsagon')
-const { getFastlySpan, decorateSpans, getActivationIdFromURL, getActivationIdFromCDNRequestId } = require('./coralogix')
+const { getRootSpan, decorateSpans } = require('./coralogix')
 
 // main function that will be executed by Adobe I/O Runtime
 async function main (params) {
@@ -31,13 +31,15 @@ async function main (params) {
     // extract the user Bearer token from the input request parameters
     const token = getBearerToken(params)
 
-    const fastly = await getFastlySpan(params.id, params.CORALOGIX_API_TOKEN, logger)
+    const root = await getRootSpan(params.id, params.CORALOGIX_API_TOKEN, logger)
     
     let spans = []
-    if (fastly) {
-      spans.push(fastly);
-      if (fastly.activationId) {
-        const epsagonData = await getEpsagonData(fastly.activationId, params.EPSAGON_API_TOKEN, logger)
+    if (root) {
+      if (!root.empty) {
+        spans.push(root);
+      }
+      if (root.pivotActivationId) {
+        const epsagonData = await getEpsagonData(root.pivotActivationId, params.EPSAGON_API_TOKEN, logger)
         spans = spans.concat(constructSpans(epsagonData))
         spans = await decorateSpans(spans, params.CORALOGIX_API_TOKEN, logger)
       }

@@ -1,10 +1,31 @@
 const { URL } = require('url')
-const moment = require('moment')
 const fetch = require('node-fetch')
 
 const { isURL, isCDNRequestId } = require('./utils')
 
 const CORALOGIX_API_ENDPOINT = 'https://coralogix-esapi.coralogix.com:9443/*/_search'
+
+async function runQuery(query, token, logger) {
+    let response = await fetch(CORALOGIX_API_ENDPOINT, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'token': `${token}`
+        },
+        body: JSON.stringify(query),
+
+    })
+    if (!response.ok) {
+        logger.error('Error while requesting Coralogix API', response.body)
+        throw new Error(`Request to ${CORALOGIX_API_ENDPOINT} failed with status code ${response.status}`)
+    }
+
+    const json = await response.json()
+    if (json && json.hits && json.hits.hits && json.hits.hits.length > 0) {
+        return json.hits.hits;
+    }
+    return [];
+}
 
 async function decorateSpans(spans, token, logger) {
 
@@ -14,17 +35,11 @@ async function decorateSpans(spans, token, logger) {
         // const currentTime = new Date().getTime()
 
         // // fetch content from external api endpoint
-        let response = await fetch(CORALOGIX_API_ENDPOINT, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'token': `${token}`
-            },
-            body: JSON.stringify({
-                'query': {
-                    'query_string' : {
-                        'query' : `(ow.activationId: ${activationIds.join(') OR (ow.activationId: ')})`,
-                    }
+        let hits = await runQuery({
+            'query': {
+                'query_string' : {
+                    'query' : `(ow.activationId: ${activationIds.join(') OR (ow.activationId: ')})`,
+                }
             },
             'sort': [{
                 'coralogix.timestamp': {
@@ -32,21 +47,17 @@ async function decorateSpans(spans, token, logger) {
                 }
             }],
             'size': 200
-        }),
+        }, token, logger)
 
-        })
-        if (!response.ok) {
-            logger.error('Error while requesting Coralogix API', response.body)
-            throw new Error(`Request to ${CORALOGIX_API_ENDPOINT} failed with status code ${response.status}`)
-        }
+        hits.forEach((hit) => {
+            const s = hit._source
+            if (s.message) {
+                //only add to log entries with messages
 
-        const json = await response.json()
-        if (json && json.hits && json.hits.hits) {
-            json.hits.hits.forEach((hit) => {
                 const activationId = hit._source.ow.activationId
                 // get corresponding span
                 const span = spans.filter((span) => span.activationId === activationId)[0]
-                const s = hit._source
+                
                 const logEntry = {
                     activationId: s.ow.activationId,
                     actionName: s.ow.actionName,
@@ -61,109 +72,32 @@ async function decorateSpans(spans, token, logger) {
                 }
                 span.url = s.cdn ? s.cdn.url : null
 
-                span.logs = span.logs || [];
+                span.logs = span.logs || []
                 // only source is useful
                 span.logs.push(logEntry)
-            })
+            }
+        })
 
-            // sort the logs
-            spans.forEach((span) => {
+        // sort the logs
+        spans.forEach((span) => {
+            if (span.logs) {
                 span.logs = span.logs.sort((a,b) => {
                     if (a.timestamp < b.timestamp) return -1
                     if (a.timestamp > b.timestamp) return 1
                     return 0
                 })
-            })
-        }
+            }
+        })
     }
     return spans
 }
 
-async function getActivationIdFromURL(url, token, logger) {
-
-    const href = new URL(url).href
-
-    let query = `(cdn.url.keyword: "${href}") AND (ow.actionName: "/helix/helix-services/dispatch*")`
-    if (href.length > 70) {
-        // keyword is limited to 70 characters, prefer standard search then
-        query = `(cdn.url: "${href}") AND (ow.actionName: "/helix/helix-services/dispatch*")`
-    }
-    // retrieve first dispatch activation with cdn.url = url
-    let response = await fetch(CORALOGIX_API_ENDPOINT, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'token': `${token}`
-        },
-        body: JSON.stringify({
-            'query':{
-                'query_string':{
-                    query
-                }
-            },
-            'sort': [{
-                'coralogix.timestamp': {
-                    'order': 'desc'
-                }
-            }],
-            'size': '1'
-        }),
-
-    })
-    if (!response.ok) {
-        logger.error('Error while requesting Coralogix API', response.body)
-        throw new Error(`Request to ${CORALOGIX_API_ENDPOINT} failed with status code ${response.status}`)
+async function getCDNRequestId(id, token, logger) {
+    if (isCDNRequestId(id)) {
+        return id
     }
 
-    const json = await response.json()
-    if (json && json.hits && json.hits.hits && json.hits.hits.length > 0 && json.hits.hits[0]._source) {
-        return json.hits.hits[0]._source.ow.activationId
-    }
-
-    return null
-}
-
-async function getActivationIdFromCDNRequestId(cdnRequestId, token, logger) {
-
-    let query = `(actionOptions.params.__ow_headers.x-cdn-request-id: "${cdnRequestId}") AND (ow.actionName: "/helix/helix-services/dispatch*")`
-
-    // retrieve first dispatch activation with cdn.url = url
-    let response = await fetch(CORALOGIX_API_ENDPOINT, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'token': `${token}`
-        },
-        body: JSON.stringify({
-            'query':{
-                'query_string':{
-                    query
-                }
-            },
-            'sort': [{
-                'coralogix.timestamp': {
-                    'order': 'desc'
-                }
-            }],
-            'size': '1'
-        }),
-
-    })
-    if (!response.ok) {
-        logger.error('Error while requesting Coralogix API', response.body)
-        throw new Error(`Request to ${CORALOGIX_API_ENDPOINT} failed with status code ${response.status}`)
-    }
-
-    const json = await response.json()
-    if (json && json.hits && json.hits.hits && json.hits.hits.length > 0 && json.hits.hits[0]._source) {
-        return json.hits.hits[0]._source.ow.activationId
-    }
-
-    return null
-}
-
-async function getFastlySpan(id, token, logger) {
-    let query = `(ow.activationId: "${id}")`
+    let query = `(ow.activationId: "${id}") AND (ow.actionName: "/helix/helix-services/dispatch*") AND (_exists_: actionOptions.params.__ow_headers.x-cdn-request-id)`
     if (isURL(id)) {
         const href = new URL(id).href
         query = `(cdn.url.keyword: "${href}")`
@@ -171,21 +105,44 @@ async function getFastlySpan(id, token, logger) {
             // keyword is limited to 70 characters, prefer standard search then but might lead to uncertain results
             query = `(cdn.url: "${href}")`
         }
-    } else {
-        if (isCDNRequestId(id)) {
-            query = `(cdn.request.id: "${id}")`
-        }
+        query += ' AND (coralogix.metadata.applicationName: fastly)'
     }
 
-    query = `${query} AND (coralogix.metadata.applicationName: "fastly")`
-
-    let response = await fetch(CORALOGIX_API_ENDPOINT, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'token': `${token}`
+    const hits = await runQuery({
+        'query':{
+            'query_string':{
+                query
+            }
         },
-        body: JSON.stringify({
+        'sort': [{
+            'coralogix.timestamp': {
+                'order': 'desc'
+            }
+        }],
+        'size': 1
+    }, token, logger);
+
+    if (hits.length > 0) {
+        if (hits[0]._source.actionOptions) {
+            return hits[0]._source.actionOptions.params.__ow_headers['x-cdn-request-id']
+        } else {
+            if(hits[0]._source.cdn && hits[0]._source.cdn.request) {
+                return hits[0]._source.cdn.request.id
+            }
+        }
+    }
+    return null
+}
+
+async function getRootSpan(id, token, logger) {
+    const requestId = await getCDNRequestId(id, token, logger)
+
+    if (!requestId) return null;
+
+    // should give 2 types of results: the fastly entry and the dispatch activation logs
+    const query = `(cdn.request.id.keyword: "${requestId}") OR ((actionOptions.params.__ow_headers.x-cdn-request-id: "${requestId}") AND (ow.actionName: "/helix/helix-services/dispatch*"))`
+
+    const hits = await runQuery({
             'query':{
                 'query_string':{
                     query
@@ -196,34 +153,49 @@ async function getFastlySpan(id, token, logger) {
                     'order': 'desc'
                 }
             }],
-            'size': 1
-        }),
+            'size': 100
+    }, token, logger)
 
-    })
-    if (!response.ok) {
-        logger.error('Error while requesting Coralogix API', response.body)
-        throw new Error(`Request to ${CORALOGIX_API_ENDPOINT} failed with status code ${response.status}`)
-    }
+    if (hits.length > 0) {
+        let pivotActivationId;
+        let root;
 
-    const json = await response.json()
-    if (json && json.hits && json.hits.hits && json.hits.hits.length > 0 && json.hits.hits[0]._source) {
-        const s = json.hits.hits[0]._source;
-        const d = moment(s.cdn.time.start, 'YYYY-MM-DD HH:mm:sszz');
+        hits.forEach((hit) => {
+            const s = hit._source;
+            if (s.coralogix.metadata.applicationName === 'fastly') {
+                // found fastly entry
+                root = s;
+            } else {
+                // use pivot activationId from non fastly log, i.e the dispatch log
+                pivotActivationId = s.ow.activationId;
+            }
+        })
+
+        if (!root) {
+            // no fastly log entry, take the last entry in the hits
+            return {
+                pivotActivationId,
+                empty: true
+            }
+        }
+
         return {
-            duration: s.cdn.time.elapsed,
+            pivotActivationId, 
+            duration: root.cdn.time.elapsed,
             // error: span.error,
-            activationId: s.ow.activationId !== '(null)' ? s.ow.activationId : null,
-            name: s.coralogix.metadata.applicationName,
+            activationId: root.ow.activationId !== '(null)' ? root.ow.activationId : null,
+            name: root.coralogix.metadata.applicationName,
             // operation: span.operation_name,
             // spanId: span.span_id,
-            timestamp: d.toDate().getTime(),
-            date: d.format(),
+            timestamp: root.cdn.time.start_msec,
+            date: root.cdn.time.start,
             // params: span.tags.params,
-            path: s.cdn.request.url,
-            response: s.cdn.response,
+            path: root.cdn.request.url,
+            response: root.cdn.response,
             // parentSpanId: span.references.length > 0 ? span.references[0].spanID : null,
-            status: s.cdn.response.status,
-            url: s.cdn.url,
+            status: root.cdn.response.status,
+            url: root.cdn.url,
+            data: root
         }
     }
 
@@ -232,7 +204,5 @@ async function getFastlySpan(id, token, logger) {
 
 module.exports = {
     decorateSpans,
-    getActivationIdFromURL,
-    getActivationIdFromCDNRequestId,
-    getFastlySpan
+    getRootSpan
 }
