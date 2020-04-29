@@ -248,6 +248,7 @@ export default class App extends React.Component {
                     <TH>Response</TH>
                     <TH>Logs</TH>
                     <TH>Data</TH>
+                    <TH>Replay</TH>
                   </THead>
                   <TBody>
                     { this.state.spans.map((span, index) => {
@@ -267,6 +268,22 @@ export default class App extends React.Component {
                       const logsButtonLabel = `${hasLogs ? span.logs.length : ''} logs`
 
                       const errorClassName = span.status >= 500 ? 'error' : ''
+
+                      let replayURL = ''
+                      let canReplay = false
+                      if (span.params) {
+                        canReplay = true
+                        const u = new URL(`https://adobeioruntime.net/api/v1/web${span.name}`)
+                        for(let p in span.params) {
+                          u.searchParams.append(p, span.params[p]);
+                        }
+                        replayURL = u.toString();
+                      } else {
+                        if (span.name === 'fastly') {
+                          canReplay = true
+                          replayURL = span.url
+                        }
+                      }
                       return <TR key={index} className={errorClassName}>
                         <TD>{this.viewUTCTime(span.date)}</TD>
                         <TD className={indentClassName}>{span.name}</TD>
@@ -314,6 +331,10 @@ export default class App extends React.Component {
                             </Popover>
                           </OverlayTrigger>
                           }
+                        </TD>
+                        <TD> { canReplay && 
+                          <Button label="Replay" variant="primary" onClick={() => { console.log('button clicked!!'); window.open(replayURL)} }/>
+                        }
                         </TD>
                       </TR>
                     })}
