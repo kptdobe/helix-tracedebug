@@ -271,9 +271,9 @@ export default class App extends React.Component {
 
                       let replayURL = ''
                       let canReplay = false
-                      if (span.params) {
+                      if (span.params && span.host && span.invokedName) {
                         canReplay = true
-                        const u = new URL(`https://adobeioruntime.net/api/v1/web${span.name}`)
+                        const u = new URL(`${span.host}/api/v1/web${span.invokedName}`)
                         for(let p in span.params) {
                           u.searchParams.append(p, span.params[p]);
                         }
@@ -333,7 +333,7 @@ export default class App extends React.Component {
                           }
                         </TD>
                         <TD> { canReplay && 
-                          <Button label="Replay" variant="primary" onClick={() => { console.log('button clicked!!'); window.open(replayURL)} }/>
+                          <Button label="Replay" variant="primary" onClick={() => { window.open(replayURL)} }/>
                         }
                         </TD>
                       </TR>

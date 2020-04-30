@@ -92,11 +92,22 @@ function constructSpans(data) {
         // construct spans list
         data.spans.forEach(container => {
             container.spans.forEach((span) => {
+                const actionName = span.tags['openwhisk.action_name']
+                const namespace = span.tags['openwhisk.namespace']
+                let invokedName = ''
+                if (actionName) {
+                    if (namespace) {
+                        invokedName = actionName.replace(/\/(.+?)\/(.*)/, `/${namespace}/$2`)
+                    } else {
+                        invokedName = actionName
+                    }
+                }
                 spans.push({
                     duration: span.duration,
                     error: span.error,
                     activationId: span.tags.activation_id,
-                    name: container.name,
+                    name: actionName,
+                    invokedName,
                     operation: span.operation_name,
                     spanId: span.span_id,
                     timestamp: span.start_time * 1000,
@@ -106,6 +117,7 @@ function constructSpans(data) {
                     response: span.tags.response,
                     parentSpanId: span.references.length > 0 ? span.references[0].spanID : null,
                     status: span.tags.response && span.tags.response.result ? span.tags.response.result.statusCode : (span.tags.status ? span.tags.status : 'N/A'),
+                    host: span.tags['openwhisk.api_host'] || null,
                 })
             })
         })
