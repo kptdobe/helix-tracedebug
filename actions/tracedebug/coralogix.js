@@ -97,7 +97,7 @@ async function getCDNRequestId(id, token, logger) {
         return id
     }
 
-    let query = `(ow.activationId: "${id}") AND (ow.actionName: "/helix/helix-services/dispatch*") AND (_exists_: actionOptions.params.__ow_headers.x-cdn-request-id)`
+    let query = `(ow.activationId: "${id}") AND ((_exists_: actionOptions.params.__ow_headers.x-cdn-request-id) OR (_exists_: cdn.request.id) OR (_exists_: cdn.url))`
     if (isURL(id)) {
         const href = new URL(id).href
         query = `(cdn.url.keyword: "${href}")`
@@ -123,11 +123,18 @@ async function getCDNRequestId(id, token, logger) {
     }, token, logger);
 
     if (hits.length > 0) {
-        if (hits[0]._source.actionOptions) {
-            return hits[0]._source.actionOptions.params.__ow_headers['x-cdn-request-id']
+        const s = hits[0]._source;
+        if (s.actionOptions) {
+            return s.actionOptions.params.__ow_headers['x-cdn-request-id']
         } else {
-            if(hits[0]._source.cdn && hits[0]._source.cdn.request) {
-                return hits[0]._source.cdn.request.id
+            if (s.cdn) {
+                if (s.cdn.request) {
+                    return s.cdn.request.id
+                } else {
+                    if (s.cdn.url) {
+                        return getCDNRequestId(s.cdn.url, token, logger)
+                    }
+                }
             }
         }
     }
