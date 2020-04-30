@@ -180,6 +180,14 @@ export default class App extends React.Component {
     return moment(date).utc().format('HH:mm:ss.SSS')
   }
 
+  createIndent(level) {
+    const indent = [];
+    for(let i=0;i<level;i++) {
+      indent.push(<span key={i} className="indentBox"></span>)
+    }
+    return indent;
+  }
+
   render () {
     return (
       // ErrorBoundary wraps child components to handle eventual rendering errors
@@ -244,16 +252,14 @@ export default class App extends React.Component {
                     <TH>Status</TH>
                     <TH><img className="custom-icon" src={espagonLogo} alt="View in Epsagon" title="View in Epsagon"/></TH>
                     <TH><img className="custom-icon" src={coralogixLogo} alt="View in Coralogix" title="View in Coralogix"/></TH>
-                    <TH>Params</TH>
+                    <TH>Params / Data</TH>
                     <TH>Response</TH>
                     <TH>Logs</TH>
-                    <TH>Data</TH>
                     <TH>Replay</TH>
                   </THead>
                   <TBody>
                     { this.state.spans.map((span, index) => {
                       if (span.invisible) return;
-                      const indentClassName = `indent${span.level}`
                       const espagonLink = `https://dashboard.epsagon.com/spans/${span.spanId}`
                       const coralogixLink = `https://helix.coralogix.com/#/query/logs?query=${span.activationId || this.state.id}`
                       const hasParams = span.params && Object.keys(span.params).length > 0
@@ -286,10 +292,13 @@ export default class App extends React.Component {
                       }
                       return <TR key={index} className={errorClassName}>
                         <TD>{this.viewUTCTime(span.date)}</TD>
-                        <TD className={indentClassName}>{span.name}</TD>
+                        <TD className="spanNameCell">
+                          <span className="indentOffset">{this.createIndent(span.level)}</span>
+                          <span className="spanName">{span.name}</span>
+                        </TD>
                         <TD>{span.activationId}</TD>
-                        <TD><Link href={span.url}>{span.url}</Link></TD>
-                        <TD>{span.path}</TD>
+                        <TD className="urlCell"><Link href={span.url}>{span.url}</Link></TD>
+                        <TD className="pathCell">{span.path}</TD>
                         <TD>{span.status}</TD>
                         <TD>  { span.spanId &&
                           <a href={espagonLink} target="_new"><img className="custom-icon" src={espagonLogo} alt="View in Epsagon" title="View in Epsagon"/></a>
@@ -303,6 +312,14 @@ export default class App extends React.Component {
                                 { this.getViewParams(span.params) }
                               </Popover>
                             </OverlayTrigger>
+                          }
+                          { hasData && 
+                          <OverlayTrigger placement="left">
+                            <Button label={dataButtonLabel} variant="primary" />
+                            <Popover title="Entry data" variant="default">
+                              { this.getViewParams(span.data) }
+                            </Popover>
+                          </OverlayTrigger>
                           }
                         </TD>
                         <TD> { hasResponse &&
@@ -319,15 +336,6 @@ export default class App extends React.Component {
                             <Button label={logsButtonLabel} variant="primary" />
                             <Popover title="Action logs" variant="default">
                               { this.getViewLogs(span.logs) }
-                            </Popover>
-                          </OverlayTrigger>
-                          }
-                        </TD>
-                        <TD> { hasData && 
-                          <OverlayTrigger placement="left">
-                            <Button label={dataButtonLabel} variant="primary" />
-                            <Popover title="Entry data" variant="default">
-                              { this.getViewParams(span.data) }
                             </Popover>
                           </OverlayTrigger>
                           }

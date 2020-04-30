@@ -22,21 +22,37 @@
   width: 800px
 }
 
-.indent1 {
-  padding-left: 16px;
+.urlCell, .pathCell {
+  word-break: break-all;
 }
 
-.indent1 {
-  padding-left: 28px;
+.indentOffset {
+  border-left: 1px solid transparent;
+  display: inline-flex;
+  white-space: nowrap;
 }
-.indent2 {
-  padding-left: 40px;
+
+.indentBox {
+  width: 12px;
+  height: 26px;
+
+  padding-right: calc(.5rem + 12px);
+  border-left: 1px solid rgb(74, 74, 74);
+  display: inline-flex;
+
+  color: #000;
+  position: relative;
+  line-height: 26px;
+  overflow: hidden;
+  display: flex;
 }
-.indent3 {
-  padding-left: 52px;
+
+.spanNameCell, .spanName {
+  white-space: nowrap;
 }
-.indent4 {
-  padding-left: 64px;
+
+.spanName {
+  vertical-align: top;
 }
 
 .custom-icon {
