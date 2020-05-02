@@ -98,11 +98,13 @@ export default class App extends React.Component {
     }
   }
 
-  handleIdChange(value) {
-    this.setState({'id': value})
-    const u = new URL(window.location.href);
-    u.hash = value;
-    window.location.href = u.href;
+  handleIdChange(evt) {
+    this.setState({'id': evt.target.value})
+    window.location.hash = evtl.target.value;
+    if (evt.charCode === 13) {
+      // enter key pressed
+      this.search.bind(this);
+    }
   }
 
   getViewParams(params) {
@@ -200,7 +202,7 @@ export default class App extends React.Component {
             <Heading variant="subtitle1">Enter a activation id or an already requested url</Heading>
             <InputGroup>
               <Label>Activation ID or URL or CDN-Request-Id</Label>
-              <Textfield id="id" name="id" value={this.state.id} onChange={v => this.handleIdChange(v)}/>
+              <Textfield id="id" name="id" value={this.state.id} onChange={this.handleIdChange} onKeyDown={this.handleIdChange}/>
               <Button onClick={ this.search.bind(this) }>Search</Button>
             </InputGroup>
               { this.state.errorMsg &&
