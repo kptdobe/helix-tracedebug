@@ -100,7 +100,7 @@ export default class App extends React.Component {
 
   handleIdChange(evt) {
     this.setState({'id': evt.target.value})
-    window.location.hash = evtl.target.value;
+    window.location.hash = evt.target.value;
     if (evt.charCode === 13) {
       // enter key pressed
       this.search.bind(this);
