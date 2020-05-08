@@ -205,7 +205,7 @@ export default class App extends React.Component {
             <Heading>Helix, trace and debug</Heading>
             <p>Welcome to "Helix, trace and debug" which helps you to trace your activations.</p>
 
-            <Heading variant="subtitle1">Enter a activation id or an already requested url</Heading>
+            <Heading variant="subtitle1">Enter a activation id, an already requested url or a CDN request id</Heading>
             <InputGroup>
               <Label>Activation ID or URL or CDN-Request-Id</Label>
               <Textfield id="id" name="id" value={this.state.id} onChange={this.handleIdChange} onKeyDown={this.handleKeyDown}/>
@@ -249,21 +249,22 @@ export default class App extends React.Component {
                   <span><b>Trace start time (local):</b> {this.viewLocaleTime(this.state.spans[0].date)}</span>
                   <br/>
                   <span><b>Total duration:</b> {(this.state.spans[0].duration / 1000000).toFixed(2)}s</span>
+                  <br/>
+                  <span><b>URL:</b> <Link href={this.state.spans[0].url}>{this.state.spans[0].url}</Link></span>
                 </p>
                 <Table>
                   <THead>
                     <TH>Time (UTC)</TH>
                     <TH>Action</TH>
                     <TH>Activation ID</TH>
-                    <TH>URL</TH>
                     <TH>Path</TH>
                     <TH>Status</TH>
                     <TH><img className="custom-icon" src={espagonLogo} alt="View in Epsagon" title="View in Epsagon"/></TH>
                     <TH><img className="custom-icon" src={coralogixLogo} alt="View in Coralogix" title="View in Coralogix"/></TH>
-                    <TH>Params / Data</TH>
                     <TH>Response</TH>
                     <TH>Logs</TH>
                     <TH>Replay</TH>
+                    <TH>Params / Data</TH>
                   </THead>
                   <TBody>
                     { this.state.spans.map((span, index) => {
@@ -305,7 +306,6 @@ export default class App extends React.Component {
                           <span className="spanName">{span.name}</span>
                         </TD>
                         <TD>{span.activationId}</TD>
-                        <TD className="urlCell"><Link href={span.url}>{span.url}</Link></TD>
                         <TD className="pathCell">{span.path}</TD>
                         <TD>{span.status}</TD>
                         <TD>  { span.spanId &&
@@ -313,23 +313,6 @@ export default class App extends React.Component {
                         }
                         </TD>
                         <TD><a href={coralogixLink} target="_new"><img className="custom-icon" src={coralogixLogo} alt="View in Coralogix" title="View in Coralogix"/></a></TD>
-                        <TD> { hasParams &&
-                            <OverlayTrigger placement="left">
-                              <Button label={paramsButtonLabel} variant="primary" />
-                              <Popover title="Action parameters" variant="default">
-                                { this.getViewParams(span.params) }
-                              </Popover>
-                            </OverlayTrigger>
-                          }
-                          { hasData && 
-                          <OverlayTrigger placement="left">
-                            <Button label={dataButtonLabel} variant="primary" />
-                            <Popover title="Entry data" variant="default">
-                              { this.getViewParams(span.data) }
-                            </Popover>
-                          </OverlayTrigger>
-                          }
-                        </TD>
                         <TD> { hasResponse &&
                             <OverlayTrigger placement="left">
                               <Button label="Response" variant="primary" />
@@ -351,6 +334,23 @@ export default class App extends React.Component {
                         <TD> { canReplay && 
                           <Button label="Replay" variant="primary" onClick={() => { window.open(replayURL)} }/>
                         }
+                        </TD>
+                        <TD> { hasParams &&
+                            <OverlayTrigger placement="left">
+                              <Button label={paramsButtonLabel} variant="primary" />
+                              <Popover title="Action parameters" variant="default">
+                                { this.getViewParams(span.params) }
+                              </Popover>
+                            </OverlayTrigger>
+                          }
+                          { hasData && 
+                          <OverlayTrigger placement="left">
+                            <Button label={dataButtonLabel} variant="primary" />
+                            <Popover title="Entry data" variant="default">
+                              { this.getViewParams(span.data) }
+                            </Popover>
+                          </OverlayTrigger>
+                          }
                         </TD>
                       </TR>
                     })}

@@ -22,7 +22,7 @@
   width: 800px
 }
 
-.urlCell, .pathCell {
+.pathCell {
   word-break: break-all;
 }
 
@@ -69,4 +69,8 @@
 
 tr.error {
   background-color: #880000 !important;
+}
+
+.spectrum-Table {
+  width: 100%;
 }
