@@ -92,8 +92,9 @@ function constructSpans(data) {
         // construct spans list
         data.spans.forEach(container => {
             container.spans.forEach((span) => {
-                let actionName = span.tags['openwhisk.action_name']
-                const namespace = span.tags['openwhisk.namespace']
+                const tags = span.tags
+                let actionName = tags['openwhisk.action_name']
+                const namespace = tags['openwhisk.namespace']
                 let invokedName = ''
                 if (actionName) {
                     if (namespace) {
@@ -104,16 +105,17 @@ function constructSpans(data) {
                 } else {
                     actionName = container.name
                 }
-                let activationId = span.tags.activation_id
-                if (span.tags
-                    && span.tags.response
-                    && span.tags.response.result
-                    && span.tags.response.result.headers
-                    && span.tags.response.result.headers['x-last-activation-id']) {
+                let activationId = tags['openwhisk.action.activation_id']
+                const response = tags['openwhisk.action.response']
+                if (response
+                    && response.result
+                    && response.result.headers
+                    && response.result.headers['x-last-activation-id']) {
                         // sequences case
                         // use last-activation-id if available
-                        activationId = span.tags.response.result.headers['x-last-activation-id']
+                        activationId = response.result.headers['x-last-activation-id']
                     }
+                const params = tags['openwhisk.action.params']
                 spans.push({
                     duration: span.duration,
                     error: span.error,
@@ -124,14 +126,14 @@ function constructSpans(data) {
                     spanId: span.span_id,
                     timestamp: span.start_time * 1000,
                     date: new Date(span.start_time * 1000),
-                    params: span.tags.params,
-                    path: span.tags.params && span.tags.params.path ? span.tags.params.path : '',
-                    response: span.tags.response,
+                    params,
+                    path: params && params.path ? params.path : ( tags['http.request.path'] ? tags['http.request.path'] : ''),
+                    response,
                     parentSpanId: span.references.length > 0 ? span.references[0].spanID : null,
-                    status: span.tags.response && span.tags.response.result ? span.tags.response.result.statusCode : (span.tags.status ? span.tags.status : 'N/A'),
-                    host: span.tags['openwhisk.api_host'] || null,
+                    status: response && response.result ? response.result.statusCode : (tags.status ? tags.status : ( tags['http.status_code'] ? tags['http.status_code'] : 'N/A')),
+                    host: tags['openwhisk.api_host'] || tags['http.host'] ? (tags['http.scheme'] ? `${tags['http.scheme']}://${tags['http.host']}` : tags['http.host'])  : null,
                     type: container.type,
-                    data: span.tags.params ? null : span.tags
+                    data: tags.params ? null : tags
                 })
             })
         })

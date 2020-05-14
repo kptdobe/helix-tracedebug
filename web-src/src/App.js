@@ -264,15 +264,13 @@ export default class App extends React.Component {
                     <TH>Response</TH>
                     <TH>Logs</TH>
                     <TH>Replay</TH>
-                    <TH>Params / Data</TH>
+                    <TH>Data</TH>
                   </THead>
                   <TBody>
                     { this.state.spans.map((span, index) => {
                       if (span.invisible) return;
                       const espagonLink = `https://dashboard.epsagon.com/spans/${span.spanId}`
                       const coralogixLink = `https://helix.coralogix.com/#/query/logs?query=${span.activationId || this.state.id}`
-                      const hasParams = span.params && Object.keys(span.params).length > 0
-                      const paramsButtonLabel = `${span.params ? Object.keys(span.params).length : ''} params`
 
                       const hasData = span.data && Object.keys(span.data).length > 0
                       const dataButtonLabel = `Data`
@@ -282,17 +280,32 @@ export default class App extends React.Component {
                       const hasLogs = span.logs && span.logs.length > 0
                       const logsButtonLabel = `${hasLogs ? span.logs.length : ''} logs`
 
-                      const errorClassName = span.status >= 500 ? 'error' : ''
+                      const errorClassName = span.error || span.status >= 500 ? 'error' : ''
 
                       let replayURL = ''
                       let canReplay = false
-                      if (span.params && span.host && span.invokedName) {
-                        canReplay = true
-                        const u = new URL(`${span.host}/api/v1/web${span.invokedName}`)
-                        for(let p in span.params) {
-                          u.searchParams.append(p, span.params[p]);
+                      if (span.host) {
+                        if (span.invokedName) {
+                          canReplay = true
+                          const u = new URL(`${span.host}/api/v1/web${span.invokedName}`)
+                          if (span.params) {
+                            for(let p in span.params) {
+                              u.searchParams.append(p, span.params[p]);
+                            }
+                          }
+                          replayURL = u.toString();
+                        } else {
+                          if (span.path) {
+                            canReplay = true
+                            const u = new URL(`${span.host.indexOf('https') === 0 ? span.host : 'https://' + span.host}${span.path}`)
+                            if (span.params) {
+                              for(let p in span.params) {
+                                u.searchParams.append(p, span.params[p]);
+                              }
+                            }
+                            replayURL = u.toString();
+                          }
                         }
-                        replayURL = u.toString();
                       } else {
                         if (span.name === 'fastly') {
                           canReplay = true
@@ -306,7 +319,7 @@ export default class App extends React.Component {
                           <span className="spanName">{span.name}</span>
                         </TD>
                         <TD>{span.activationId}</TD>
-                        <TD className="pathCell">{span.path}</TD>
+                        <TD className="pathCell" title={span.path}>{span.path}</TD>
                         <TD>{span.status}</TD>
                         <TD>  { span.spanId &&
                           <a href={espagonLink} target="_new"><img className="custom-icon" src={espagonLogo} alt="View in Epsagon" title="View in Epsagon"/></a>
@@ -335,15 +348,7 @@ export default class App extends React.Component {
                           <Button label="Replay" variant="primary" onClick={() => { window.open(replayURL)} }/>
                         }
                         </TD>
-                        <TD> { hasParams &&
-                            <OverlayTrigger placement="left">
-                              <Button label={paramsButtonLabel} variant="primary" />
-                              <Popover title="Action parameters" variant="default">
-                                { this.getViewParams(span.params) }
-                              </Popover>
-                            </OverlayTrigger>
-                          }
-                          { hasData && 
+                        <TD> { hasData && 
                           <OverlayTrigger placement="left">
                             <Button label={dataButtonLabel} variant="primary" />
                             <Popover title="Entry data" variant="default">
