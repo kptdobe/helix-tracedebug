@@ -92,57 +92,90 @@ async function decorateSpans(spans, token, logger) {
     return spans
 }
 
-async function getCDNRequestId(id, token, logger) {
+async function findCDNRequestId(id, token, logger) {
     if (isCDNRequestId(id)) {
         return id
     }
 
-    let query = `(ow.activationId: "${id}") AND ((_exists_: actionOptions.params.__ow_headers.x-cdn-request-id) OR (_exists_: cdn.request.id) OR (_exists_: cdn.url))`
+    let query
     if (isURL(id)) {
         const href = new URL(id).href
-        query = `(cdn.url.keyword: "${href}")`
+        let query = `(cdn.url.keyword: "${href}")`
         if (href.length > 70) {
             // keyword is limited to 70 characters, prefer standard search then but might lead to uncertain results
             query = `(cdn.url: "${href}")`
         }
         query += ' AND (coralogix.metadata.applicationName: fastly)'
-    }
 
-    const hits = await runQuery({
-        'query':{
-            'query_string':{
-                query
+        const hits = await runQuery({
+            'query':{
+                'query_string':{
+                    query
+                }
+            },
+            'sort': [{
+                'coralogix.timestamp': {
+                    'order': 'desc'
+                }
+            }],
+            'size': 1
+        }, token, logger);
+    
+        if (hits.length > 0) {
+            const s = hits[0]._source;
+            if (s.cdn && s.cdn.request) {
+                return s.cdn.request.id
             }
-        },
-        'sort': [{
-            'coralogix.timestamp': {
-                'order': 'desc'
-            }
-        }],
-        'size': 1
-    }, token, logger);
-
-    if (hits.length > 0) {
-        const s = hits[0]._source;
-        if (s.actionOptions) {
-            return s.actionOptions.params.__ow_headers['x-cdn-request-id']
-        } else {
-            if (s.cdn) {
-                if (s.cdn.request) {
-                    return s.cdn.request.id
-                } else {
-                    if (s.cdn.url) {
-                        return getCDNRequestId(s.cdn.url, token, logger)
+        }
+    } else {
+        let query = `("${id}") AND (_exists_: ow.transactionId)`
+        let hits = await runQuery({
+            'query':{
+                'query_string':{
+                    query
+                }
+            },
+            'sort': [{
+                'coralogix.timestamp': {
+                    'order': 'desc'
+                }
+            }],
+            'size': 1
+        }, token, logger);
+    
+        if (hits.length > 0) {
+            const s = hits[0]._source;
+            if (s.ow && s.ow.transactionId) {
+                query = `(ow.transactionId: "${s.ow.transactionId}") AND (_exists_: actionOptions.params.__ow_headers.x-cdn-request-id)`
+                hits = await runQuery({
+                    'query':{
+                        'query_string':{
+                            query
+                        }
+                    },
+                    'sort': [{
+                        'coralogix.timestamp': {
+                            'order': 'desc'
+                        }
+                    }],
+                    'size': 1
+                }, token, logger);
+            
+                if (hits.length > 0) {
+                    const s = hits[0]._source;
+                    if (s.actionOptions && s.actionOptions.params && s.actionOptions.params.__ow_headers) {
+                        return s.actionOptions.params.__ow_headers['x-cdn-request-id'] || null
                     }
                 }
             }
         }
     }
+
     return null
 }
 
 async function getRootSpan(id, token, logger) {
-    const requestId = await getCDNRequestId(id, token, logger)
+    const requestId = await findCDNRequestId(id, token, logger)
 
     if (!requestId) return null;
 

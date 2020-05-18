@@ -93,18 +93,17 @@ function constructSpans(data) {
         data.spans.forEach(container => {
             container.spans.forEach((span) => {
                 const tags = span.tags
-                let actionName = tags['openwhisk.action_name']
-                const namespace = tags['openwhisk.namespace']
+                let actionName = tags['openwhisk.action.name']
                 let invokedName = ''
                 if (actionName) {
-                    if (namespace) {
-                        invokedName = actionName.replace(/\/(.+?)\/(.*)/, `/${namespace}/$2`)
-                    } else {
-                        invokedName = actionName
-                    }
+                    const namespace = tags['openwhisk.namespace']
+                    const package = tags['openwhisk.action.package']
+                    const version = tags['openwhisk.action.version']
+                    invokedName = `/${namespace ? namespace + '/' : ''}${package ? package + '/' : ''}${actionName}${version ? '@' + version : ''}`
                 } else {
                     actionName = container.name
                 }
+
                 let activationId = tags['openwhisk.action.activation_id']
                 const response = tags['openwhisk.action.response']
                 if (response
@@ -116,6 +115,13 @@ function constructSpans(data) {
                         activationId = response.result.headers['x-last-activation-id']
                     }
                 const params = tags['openwhisk.action.params']
+                let host = tags['openwhisk.api_host'];
+                if (!host) {
+                    if (tags['http.host']) {
+                        host = tags['http.scheme'] ? `${tags['http.scheme']}://${tags['http.host']}` : tags['http.host']
+                    }
+                }
+
                 spans.push({
                     duration: span.duration,
                     error: span.error,
@@ -131,7 +137,7 @@ function constructSpans(data) {
                     response,
                     parentSpanId: span.references.length > 0 ? span.references[0].spanID : null,
                     status: response && response.result ? response.result.statusCode : (tags.status ? tags.status : ( tags['http.status_code'] ? tags['http.status_code'] : 'N/A')),
-                    host: tags['openwhisk.api_host'] || tags['http.host'] ? (tags['http.scheme'] ? `${tags['http.scheme']}://${tags['http.host']}` : tags['http.host'])  : null,
+                    host, 
                     type: container.type,
                     data: tags.params ? null : tags
                 })

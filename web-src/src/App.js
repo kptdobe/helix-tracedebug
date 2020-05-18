@@ -316,7 +316,7 @@ export default class App extends React.Component {
                         <TD>{this.viewUTCTime(span.date)}</TD>
                         <TD className="spanNameCell">
                           <span className="indentOffset">{this.createIndent(span.level)}</span>
-                          <span className="spanName">{span.name}</span>
+                          <span className="spanName">{span.invokedName || span.name}</span>
                         </TD>
                         <TD>{span.activationId}</TD>
                         <TD className="pathCell" title={span.path}>{span.path}</TD>
