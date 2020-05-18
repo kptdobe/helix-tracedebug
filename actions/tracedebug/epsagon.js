@@ -122,6 +122,23 @@ function constructSpans(data) {
                     }
                 }
 
+                let status = tags['openwhisk.action.result_statuscode']
+                if (!status) {
+                    if (response && response.result && response.result.statusCode) {
+                        status = response.result.statusCode
+                    } else {
+                        if (tags.status) {
+                            status = tags.status
+                        } else {
+                            if (tags['http.status_code']) {
+                                status = tags['http.status_code']
+                            } else {
+                                stauts = ''
+                            }
+                        }
+                    }
+                }
+
                 spans.push({
                     duration: span.duration,
                     error: span.error,
@@ -136,7 +153,7 @@ function constructSpans(data) {
                     path: params && params.path ? params.path : ( tags['http.request.path'] ? tags['http.request.path'] : ''),
                     response,
                     parentSpanId: span.references.length > 0 ? span.references[0].spanID : null,
-                    status: response && response.result ? response.result.statusCode : (tags.status ? tags.status : ( tags['http.status_code'] ? tags['http.status_code'] : 'N/A')),
+                    status,
                     host, 
                     type: container.type,
                     data: tags.params ? null : tags
