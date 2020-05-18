@@ -132,8 +132,6 @@ function constructSpans(data) {
                         } else {
                             if (tags['http.status_code']) {
                                 status = tags['http.status_code']
-                            } else {
-                                stauts = ''
                             }
                         }
                     }
