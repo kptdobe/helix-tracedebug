@@ -146,7 +146,7 @@ async function findCDNRequestId(id, token, logger) {
         if (hits.length > 0) {
             const s = hits[0]._source;
             if (s.ow && s.ow.transactionId) {
-                query = `(ow.transactionId: "${s.ow.transactionId}") AND (_exists_: actionOptions.params.__ow_headers.x-cdn-request-id)`
+                query = `((ow.transactionId: "${s.ow.transactionId}") AND (_exists_: actionOptions.params.__ow_headers.x-cdn-request-id)) OR ((ow.activationId: "${s.ow.activationId}") AND (_exists_: cdn.request.id))`
                 hits = await runQuery({
                     'query':{
                         'query_string':{
@@ -163,8 +163,10 @@ async function findCDNRequestId(id, token, logger) {
             
                 if (hits.length > 0) {
                     const s = hits[0]._source;
-                    if (s.actionOptions && s.actionOptions.params && s.actionOptions.params.__ow_headers) {
-                        return s.actionOptions.params.__ow_headers['x-cdn-request-id'] || null
+                    if (s.actionOptions && s.actionOptions.params && s.actionOptions.params.__ow_headers && s.actionOptions.params.__ow_headers['x-cdn-request-id']) {
+                        return s.actionOptions.params.__ow_headers['x-cdn-request-id']
+                    } else {
+                        return (s.cdn && s.cdn.request && s.cdn.request.id) ? s.cdn.request.id : null;
                     }
                 }
             }
@@ -205,6 +207,12 @@ async function getRootSpan(id, token, logger) {
             if (s.coralogix.metadata.applicationName === 'fastly') {
                 // found fastly entry
                 root = s;
+                if (hits.length === 1 ) {
+                    // only a fastly entry with maybe an activation id
+                    if (s.ow && s.ow.activationId) {
+                        pivotActivationId = s.ow.activationId;
+                    }
+                }
             } else {
                 // use pivot activationId from non fastly log, i.e the dispatch log
                 pivotActivationId = s.ow.activationId;
