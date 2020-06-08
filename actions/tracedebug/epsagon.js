@@ -1,26 +1,35 @@
 const fetch = require('node-fetch')
 
 const EPSAGON_API_ENDPOINT = 'https://api.epsagon.com'
+const WEEK_OFFSET = 24 * 60 * 60 * 1000 * 7 // 7 days
 
 async function getData(id, token, logger) {
     const res = {
         step: 0
     }
 
-    const currentTime = new Date().getTime()
-    let url = EPSAGON_API_ENDPOINT + '/search/query_events?query=' + encodeURIComponent(JSON.stringify({
-        'search_string': [{
-            'type': 'aws_request_id',
-            'term': id
-        }],
-        'time_frame': {
-            'type': 'last_week',
+    const currentTime = (new Date()).getTime()
+    let url = EPSAGON_API_ENDPOINT + '/spans/search?limit=1&request=' + encodeURIComponent(JSON.stringify({
+      "query": [
+        {
+          "key": "openwhisk.action.activation_id",
+          "op": "=",
+          "value": id
         },
-        'sort': {
-            'by': 'start_time',
-            'direction': 'desc'
+        {
+          "key": "start_time",
+          "op": "<=",
+          "value": currentTime
         },
+        {
+          "key": "start_time",
+          "op": ">=",
+          "value": currentTime - WEEK_OFFSET
+        }
+      ]
     }))
+    
+    
 
     logger.debug(`url: ${url}`)
 
@@ -37,8 +46,8 @@ async function getData(id, token, logger) {
 
     const resources = await response.json()
 
-    if (resources && resources.length > 0) {
-        const spanId = resources[0].span_id
+    if (resources && resources.items && resources.items.length > 0) {
+        const spanId = resources.items[0].span_id
         if (spanId) {
             res.wrapper = resources[0]
             url = EPSAGON_API_ENDPOINT + '/spans/graph?span_id=' + spanId
