@@ -1,9 +1,19 @@
 {
   "name": "helix-tracedebug",
-  "version": "0.0.23",
+  "version": "0.1.0",
   "dependencies": {
     "@adobe/aio-sdk": "^2.0.0",
-    "@react/react-spectrum": "^2.29.0",
+    "@react-spectrum/button": "^3.0.0-rc.3",
+    "@react-spectrum/dialog": "^3.0.0-rc.0",
+    "@react-spectrum/form": "^3.0.0-rc.3",
+    "@react-spectrum/link": "^3.0.0-rc.0",
+    "@react-spectrum/progress": "^3.0.0-rc.3",
+    "@react-spectrum/provider": "^3.0.0-rc.3",
+    "@react-spectrum/table": "^3.0.0-alpha.0",
+    "@react-spectrum/text": "^3.0.0-rc.0",
+    "@react-spectrum/textfield": "^3.0.0-rc.3",
+    "@react-spectrum/theme-default": "^3.0.0-rc.3",
+    "@react-spectrum/well": "^3.0.0-rc.3",
     "chart.js": "^2.9.3",
     "core-js": "^3.6.4",
     "moment": "^2.24.0",
@@ -11,7 +21,6 @@
     "react": "^16.13.1",
     "react-dom": "^16.13.1",
     "react-error-boundary": "^1.2.5",
-    "react-json-view": "^1.19.1",
     "regenerator-runtime": "^0.13.5"
   },
   "devDependencies": {

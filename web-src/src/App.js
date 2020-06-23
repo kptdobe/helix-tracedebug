@@ -8,19 +8,15 @@ import ErrorBoundary from 'react-error-boundary'
 
 import moment from 'moment'
 
-import Button from '@react/react-spectrum/Button'
-import Heading from '@react/react-spectrum/Heading'
-import InputGroup from '@react/react-spectrum/InputGroup'
-import Label from '@react/react-spectrum/Label'
-import Link from '@react/react-spectrum/Link'
-import OverlayTrigger from '@react/react-spectrum/OverlayTrigger'
-import Popover from '@react/react-spectrum/Popover'
-import {Table, TR, TD, TH, THead, TBody} from '@react/react-spectrum/Table'
-import Textfield from '@react/react-spectrum/Textfield'
-import Tooltip from '@react/react-spectrum/Tooltip'
-import Wait from '@react/react-spectrum/Wait'
-
-// import ReactJson from 'react-json-view'
+import { Button, ActionButton } from '@react-spectrum/button'
+import { Heading } from '@react-spectrum/text'
+import { Link } from '@react-spectrum/link'
+import { Table, Row, Cell, TableBody, TableHeader, Column } from '@react-spectrum/Table'
+import { TextField } from '@react-spectrum/textfield'
+import { Form } from '@react-spectrum/form'
+import { ProgressCircle } from '@react-spectrum/progress'
+import { Well } from '@react-spectrum/well'
+import { DialogTrigger, Dialog } from '@react-spectrum/dialog'
 
 import './App.css'
 
@@ -206,37 +202,38 @@ export default class App extends React.Component {
             <p>Welcome to "Helix, trace and debug" which helps you to trace your activations.</p>
 
             <Heading variant="subtitle1">Enter a activation id, an already requested url or a CDN request id</Heading>
-            <InputGroup>
-              <Label>Activation ID or URL or CDN-Request-Id</Label>
-              <Textfield id="id" name="id" value={this.state.id} onChange={this.handleIdChange} onKeyDown={this.handleKeyDown}/>
-              <Button onClick={ this.search.bind(this) }>Search</Button>
-            </InputGroup>
+            <Form maxWidth="size-3600">
+              <TextField label="Activation ID or URL or CDN-Request-Id" id="id" name="id" value={this.state.id} onChange={this.handleIdChange} onKeyDown={this.handleKeyDown}/>
+              <Button onClick={ this.search.bind(this) } variant="primary">Search</Button>
               { this.state.errorMsg &&
-                <Tooltip variant="error">
+                <Well UNSAFE_className="error">
                   Failure! See the error in your browser console.
-                </Tooltip>
+                </Well>
               }
 
               { !this.state.errorMsg && this.state.response && this.state.spans && this.state.spans.length > 0 &&
-                <Tooltip variant="success">
+                <Well UNSAFE_className="success">
                   We found some info for you.
-                </Tooltip>
+                </Well>
               }
 
               { !this.state.errorMsg && this.state.response && (!this.state.spans || this.state.spans.length === 0) &&
-                <Tooltip variant="info">
+                <Well UNSAFE_className="info">
                   We did not find anything for activation {this.state.id}.
-                </Tooltip>
+                </Well>
               }
-              <p>Notes:</p>
-              <ul>
-                <li>the search is limited to the last 7 days</li>
-                <li>URL longer than 70 characters cannot be searched by strict equality, they are then searched by "starts with url" - you may have unexpected results</li>
-              </ul>
+            </Form>
+
+            <p>Notes:</p>
+            <ul>
+              <li>the search is limited to the last 7 days</li>
+              <li>URL longer than 70 characters cannot be searched by strict equality, they are then searched by "starts with url" - you may have unexpected results</li>
+            </ul>
+
 
             {
               this.state.loading && 
-                <Wait centered size="L" />
+                <ProgressCircle aria-label="Loading…" size="L" isIndeterminate />
             }
 
             {
@@ -250,23 +247,23 @@ export default class App extends React.Component {
                   <br/>
                   <span><b>Total duration:</b> {(this.state.spans[0].duration / 1000000).toFixed(2)}s</span>
                   <br/>
-                  <span><b>URL:</b> <Link href={this.state.spans[0].url}>{this.state.spans[0].url}</Link></span>
+                  <span><b>URL:</b> <Link variant="primary"><a href={this.state.spans[0].url}>{this.state.spans[0].url}</a></Link></span>
                 </p>
                 <Table>
-                  <THead>
-                    <TH>Time (UTC)</TH>
-                    <TH>Action</TH>
-                    <TH>Activation ID</TH>
-                    <TH>Path</TH>
-                    <TH>Status</TH>
-                    <TH><img className="custom-icon" src={espagonLogo} alt="View in Epsagon" title="View in Epsagon"/></TH>
-                    <TH><img className="custom-icon" src={coralogixLogo} alt="View in Coralogix" title="View in Coralogix"/></TH>
-                    <TH>Response</TH>
-                    <TH>Logs</TH>
-                    <TH>Replay</TH>
-                    <TH>Data</TH>
-                  </THead>
-                  <TBody>
+                  <TableHeader>
+                    <Column>Time (UTC)</Column>
+                    <Column>Action</Column>
+                    <Column>Activation ID</Column>
+                    <Column>Path</Column>
+                    <Column>Status</Column>
+                    <Column><img className="custom-icon" src={espagonLogo} alt="View in Epsagon" title="View in Epsagon"/></Column>
+                    <Column><img className="custom-icon" src={coralogixLogo} alt="View in Coralogix" title="View in Coralogix"/></Column>
+                    <Column>Response</Column>
+                    <Column>Logs</Column>
+                    <Column>Replay</Column>
+                    <Column>Data</Column>
+                  </TableHeader>
+                  <TableBody>
                     { this.state.spans.map((span, index) => {
                       if (span.invisible) return;
                       const espagonLink = `https://dashboard.epsagon.com/spans/${span.spanId}`
@@ -312,58 +309,57 @@ export default class App extends React.Component {
                           replayURL = span.url
                         }
                       }
-                      return <TR key={index} className={errorClassName}>
-                        <TD>{this.viewUTCTime(span.date)}</TD>
-                        <TD className="spanNameCell">
+                      return <Row key={index} className={errorClassName}>
+                        <Cell>{this.viewUTCTime(span.date)}</Cell>
+                        <Cell className="spanNameCell">
                           <span className="indentOffset">{this.createIndent(span.level)}</span>
                           <span className="spanName">{span.invokedName || span.name}</span>
-                        </TD>
-                        <TD>{span.activationId}</TD>
-                        <TD className="pathCell" title={span.path}>{span.path}</TD>
-                        <TD>{span.status}</TD>
-                        <TD>  { span.spanId &&
+                        </Cell>
+                        <Cell>{span.activationId}</Cell>
+                        <Cell className="pathCell" title={span.path}>{span.path}</Cell>
+                        <Cell>{span.status}</Cell>
+                        <Cell>  { span.spanId &&
                           <a href={espagonLink} target="_new"><img className="custom-icon" src={espagonLogo} alt="View in Epsagon" title="View in Epsagon"/></a>
                         }
-                        </TD>
-                        <TD><a href={coralogixLink} target="_new"><img className="custom-icon" src={coralogixLogo} alt="View in Coralogix" title="View in Coralogix"/></a></TD>
-                        <TD> { hasResponse &&
-                            <OverlayTrigger placement="left">
-                              <Button label="Response" variant="primary" />
-                              <Popover title="Action response" variant="default">
+                        </Cell>
+                        <Cell><a href={coralogixLink} target="_new"><img className="custom-icon" src={coralogixLogo} alt="View in Coralogix" title="View in Coralogix"/></a></Cell>
+                        <Cell> { hasResponse &&
+                            <DialogTrigger placement="left">
+                              <ActionButton>Response</ActionButton>
+                              <Dialog title="Action response" variant="default">
                                 { this.getViewResponse(span.response) }
-                              </Popover>
-                            </OverlayTrigger>
+                              </Dialog>
+                            </DialogTrigger>
                           }
-                        </TD>
-                        <TD> { hasLogs && 
-                          <OverlayTrigger placement="left">
-                            <Button label={logsButtonLabel} variant="primary" />
-                            <Popover title="Action logs" variant="default">
+                        </Cell>
+                        <Cell> { hasLogs && 
+                          <DialogTrigger placement="left">
+                            <ActionButton>{logsButtonLabel}</ActionButton>
+                            <Dialog title="Action logs" variant="default">
                               { this.getViewLogs(span.logs) }
-                            </Popover>
-                          </OverlayTrigger>
+                            </Dialog>
+                          </DialogTrigger>
                           }
-                        </TD>
-                        <TD> { canReplay && 
+                        </Cell>
+                        <Cell> { canReplay && 
                           <Button label="Replay" variant="primary" onClick={() => { window.open(replayURL)} }/>
                         }
-                        </TD>
-                        <TD> { hasData && 
-                          <OverlayTrigger placement="left">
-                            <Button label={dataButtonLabel} variant="primary" />
-                            <Popover title="Entry data" variant="default">
+                        </Cell>
+                        <Cell> { hasData && 
+                          <DialogTrigger placement="left">
+                            <ActionButton>{dataButtonLabel}</ActionButton>
+                            <Dialog title="Entry data" variant="default">
                               { this.getViewParams(span.data) }
-                            </Popover>
-                          </OverlayTrigger>
+                            </Dialog>
+                          </DialogTrigger>
                           }
-                        </TD>
-                      </TR>
+                        </Cell>
+                      </Row>
                     })}
-                  </TBody>
+                  </TableBody>
                 </Table>
                 <br/>
                 <br/>
-                {/* <ReactJson src={this.state.response.spans} /> */}
               </div>
             }
           </div>

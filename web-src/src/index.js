@@ -8,7 +8,8 @@ import "regenerator-runtime/runtime"
 import React from 'react'
 import ReactDOM from 'react-dom'
 
-import Provider from '@react/react-spectrum/Provider';
+import { Provider } from '@react-spectrum/provider';
+import { theme } from '@react-spectrum/theme-default';
 
 import App from './App'
 import loadExcRuntime from './exc-runtime'
@@ -43,7 +44,7 @@ function bootstrapRaw () {
 
   // render the actual react application and pass along the runtime object to make it available to the App
   ReactDOM.render(
-    <Provider theme='dark'>
+    <Provider theme={theme} colorScheme="dark" scale="large">
       <App runtime={ runtime } ims={ ims }/>
     </Provider>, document.getElementById('root'))
 }
@@ -75,7 +76,7 @@ function bootstrapInExcShell () {
     }
     // render the actual react application and pass along the runtime and ims objects to make it available to the App
     ReactDOM.render(
-      <Provider theme='dark'>
+      <Provider theme={theme} colorScheme="dark" scale="large">
         <App runtime={ runtime } ims={ ims }/>
       </Provider>, document.getElementById('root'))
   })
