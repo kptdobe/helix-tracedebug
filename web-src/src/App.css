@@ -1,26 +1,38 @@
 /*
 * <license header>
 */
-
-.page-content { 
-  display:-ms-flexbox;
-  display:flex;
-  -ms-flex:1 0 auto;
-  flex:1 0 auto;
-  -ms-flex-pack:center;
-  justify-content:center;
-  overflow:auto
+body {
+  margin: 0;
+  overflow: hidden;
 }
 
-.main {
+main { 
+  display: -ms-flexbox;
+  display: flex;
+  -ms-flex: 1 0 auto;
+  flex: 1 0 auto;
+  -ms-flex-pack: center;
+  justify-content: center;
+  overflow-y: scroll;
+  overflow-x: hidden;
+  
   width: 100%;
-  min-height: 800px;
+  min-height: 100vh;
   margin: 10px 20px;
 }
 
-#id {
-  width: 800px
+main article {
+  width: 100%;
+  -ms-flex: 1;
+  flex: 1;
+  padding-bottom: 40px;
 }
+
+.custom-icon {
+  width: 30px;
+}
+
+/*
 
 .pathCell {
   text-overflow: ellipsis;
@@ -58,10 +70,6 @@
   vertical-align: top;
 }
 
-.custom-icon {
-  width: 30px;
-}
-
 .react-json-view {
   background-color: white !important;
 }
@@ -77,15 +85,4 @@ tr.error {
 .spectrum-Table {
   width: 100%;
 }
-
-.success {
-  background-color: green;
-}
-
-.error {
-  background-color: red;
-}
-
-.info {
-  background-color: blue;
-}
+*/

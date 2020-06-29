@@ -17,9 +17,13 @@ import { Form } from '@react-spectrum/form'
 import { ProgressCircle } from '@react-spectrum/progress'
 import { Well } from '@react-spectrum/well'
 import { DialogTrigger, Dialog } from '@react-spectrum/dialog'
+import { IllustratedMessage } from '@react-spectrum/illustratedmessage'
+import { Content, View } from '@react-spectrum/view'
 
 import './App.css'
 
+import NotFound from '@spectrum-icons/illustrations/NotFound';
+import Error from '@spectrum-icons/illustrations/Error';
 import espagonLogo from '../resources/epsagon.svg'
 import coralogixLogo from '../resources/coralogix.png'
 
@@ -64,7 +68,7 @@ export default class App extends React.Component {
   }
 
   async invoke (action, params) {
-    this.setState({ loading: true })
+    this.setState({ loading: true, response: null, errorMsg: null, spans: null })
     // set the authorization header and org from the ims props object
     const headers = {}
     if (this.props.ims.token) {
@@ -196,44 +200,51 @@ export default class App extends React.Component {
     return (
       // ErrorBoundary wraps child components to handle eventual rendering errors
       <ErrorBoundary onError={ this.onError } FallbackComponent={ this.fallbackComponent } >
-        <div className="page-content">
-          <div className="main">
-            <Heading>Helix, trace and debug</Heading>
-            <p>Welcome to "Helix, trace and debug" which helps you to trace your activations.</p>
+        <main>
+          <article>
+            <Heading level={1}>Helix, trace and debug</Heading>
+            <Content>Welcome to "Helix, trace and debug" which helps you to trace your activations.</Content>
 
-            <Heading variant="subtitle1">Enter a activation id, an already requested url or a CDN request id</Heading>
-            <Form maxWidth="size-3600">
-              <TextField label="Activation ID or URL or CDN-Request-Id" id="id" name="id" value={this.state.id} onChange={this.handleIdChange} onKeyDown={this.handleKeyDown}/>
-              <Button onClick={ this.search.bind(this) } variant="primary">Search</Button>
-              { this.state.errorMsg &&
-                <Well UNSAFE_className="error">
-                  Failure! See the error in your browser console.
-                </Well>
-              }
-
-              { !this.state.errorMsg && this.state.response && this.state.spans && this.state.spans.length > 0 &&
-                <Well UNSAFE_className="success">
-                  We found some info for you.
-                </Well>
-              }
-
-              { !this.state.errorMsg && this.state.response && (!this.state.spans || this.state.spans.length === 0) &&
-                <Well UNSAFE_className="info">
-                  We did not find anything for activation {this.state.id}.
-                </Well>
-              }
+            <Form>
+              <View>
+                <Content>Enter an Activation ID, an already requested URL or a CDN-Request-Id:</Content>
+                <TextField width="size-3600" id="id" name="id" value={this.state.id} onChange={this.handleIdChange} onKeyDown={this.handleKeyDown}/>
+                <Button marginStart="size-150" maxWidth="size-1000" onClick={ this.search.bind(this) } variant="cta">Search</Button>
+              </View>
             </Form>
 
-            <p>Notes:</p>
-            <ul>
-              <li>the search is limited to the last 7 days</li>
-              <li>URL longer than 70 characters cannot be searched by strict equality, they are then searched by "starts with url" - you may have unexpected results</li>
-            </ul>
+            <Well>
+              Notes:
+              <ul>
+                <li>the search is limited to the last 7 days</li>
+                <li>URL longer than 70 characters cannot be searched by strict equality, they are then searched by "starts with url" - you may have unexpected results</li>
+              </ul>
+            </Well>
 
 
             {
               this.state.loading && 
+              <IllustratedMessage>
                 <ProgressCircle aria-label="Loading…" size="L" isIndeterminate />
+              </IllustratedMessage>
+            }
+
+
+            { 
+              !this.state.errorMsg && this.state.response && (!this.state.spans || this.state.spans.length === 0) &&
+                <IllustratedMessage>
+                  <NotFound />
+                  <Heading>No Results</Heading>
+                  <Content>Try another search</Content>
+                </IllustratedMessage>
+            }
+
+            { this.state.errorMsg &&
+                <IllustratedMessage>
+                  <Error />
+                  <Heading>Error</Heading>
+                  <Content>Failure! See the error in your browser console.</Content>
+              </IllustratedMessage>
             }
 
             {
@@ -362,8 +373,8 @@ export default class App extends React.Component {
                 <br/>
               </div>
             }
-          </div>
-        </div>
+          </article>
+        </main>
       </ErrorBoundary>
     )
   }
