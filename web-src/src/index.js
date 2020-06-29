@@ -44,7 +44,7 @@ function bootstrapRaw () {
 
   // render the actual react application and pass along the runtime object to make it available to the App
   ReactDOM.render(
-    <Provider theme={theme} colorScheme="dark" scale="large">
+    <Provider theme={theme} colorScheme="dark" scale="medium">
       <App runtime={ runtime } ims={ ims }/>
     </Provider>, document.getElementById('root'))
 }
@@ -76,7 +76,7 @@ function bootstrapInExcShell () {
     }
     // render the actual react application and pass along the runtime and ims objects to make it available to the App
     ReactDOM.render(
-      <Provider theme={theme} colorScheme="dark" scale="large">
+      <Provider theme={theme} colorScheme="dark" scale="medium">
         <App runtime={ runtime } ims={ ims }/>
       </Provider>, document.getElementById('root'))
   })

@@ -3,7 +3,8 @@
 */
 body {
   margin: 0;
-  overflow: hidden;
+  overflow-y: auto;
+  overflow-x: hidden;
 }
 
 main { 
@@ -13,16 +14,16 @@ main {
   flex: 1 0 auto;
   -ms-flex-pack: center;
   justify-content: center;
-  overflow-y: scroll;
-  overflow-x: hidden;
   
   width: 100%;
   min-height: 100vh;
-  margin: 10px 20px;
+  height: 100%;
+  margin: 0 20px;
 }
 
 main article {
   width: 100%;
+  height: 100%;
   -ms-flex: 1;
   flex: 1;
   padding-bottom: 40px;
@@ -32,15 +33,6 @@ main article {
   width: 30px;
 }
 
-/*
-
-.pathCell {
-  text-overflow: ellipsis;
-  max-width: 200px;
-  overflow: hidden;
-  white-space: nowrap;
-}
-
 .indentOffset {
   border-left: 1px solid transparent;
   display: inline-flex;
@@ -48,41 +40,15 @@ main article {
 }
 
 .indentBox {
-  width: 12px;
-  height: 26px;
+  height: 15px;
 
-  padding-right: calc(.5rem + 12px);
+  padding-right: calc(.5rem + 2px);
   border-left: 1px solid rgb(74, 74, 74);
   display: inline-flex;
 
   color: #000;
   position: relative;
-  line-height: 26px;
+  line-height: 15px;
   overflow: hidden;
   display: flex;
 }
-
-.spanNameCell, .spanName {
-  white-space: nowrap;
-}
-
-.spanName {
-  vertical-align: top;
-}
-
-.react-json-view {
-  background-color: white !important;
-}
-
-.spectrum-Dialog-content ul { 
-  max-width: 1000px;
-}
-
-tr.error {
-  background-color: #880000 !important;
-}
-
-.spectrum-Table {
-  width: 100%;
-}
-*/

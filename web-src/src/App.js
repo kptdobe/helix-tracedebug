@@ -28,7 +28,6 @@ import espagonLogo from '../resources/epsagon.svg'
 import coralogixLogo from '../resources/coralogix.png'
 
 import { actionWebInvoke } from './utils'
-import actions from './config.json'
 
 /* Here is your entry point React Component, this class has access to the Adobe Experience Cloud Shell runtime object */
 
@@ -208,7 +207,7 @@ export default class App extends React.Component {
             <Form>
               <View>
                 <Content>Enter an Activation ID, an already requested URL or a CDN-Request-Id:</Content>
-                <TextField width="size-3600" id="id" name="id" value={this.state.id} onChange={this.handleIdChange} onKeyDown={this.handleKeyDown}/>
+                <TextField width="size-3600" id="id" name="id" aria-label="Enter an Activation ID, an already requested URL or a CDN-Request-Id" value={this.state.id} onChange={this.handleIdChange} onKeyDown={this.handleKeyDown}/>
                 <Button marginStart="size-150" maxWidth="size-1000" onClick={ this.search.bind(this) } variant="cta">Search</Button>
               </View>
             </Form>
@@ -220,7 +219,8 @@ export default class App extends React.Component {
                 <li>URL longer than 70 characters cannot be searched by strict equality, they are then searched by "starts with url" - you may have unexpected results</li>
               </ul>
             </Well>
-
+            <br/>
+            <br/>
 
             {
               this.state.loading && 
@@ -228,7 +228,6 @@ export default class App extends React.Component {
                 <ProgressCircle aria-label="Loading…" size="L" isIndeterminate />
               </IllustratedMessage>
             }
-
 
             { 
               !this.state.errorMsg && this.state.response && (!this.state.spans || this.state.spans.length === 0) &&
@@ -250,29 +249,30 @@ export default class App extends React.Component {
             {
               this.state.spans && this.state.spans.length > 0 &&
               <div>
-                <br/>
-                <p>
-                  <span><b>Trace start date (local):</b> {this.viewLocaleDate(this.state.spans[0].date)}</span>
-                  <br/>
-                  <span><b>Trace start time (local):</b> {this.viewLocaleTime(this.state.spans[0].date)}</span>
-                  <br/>
-                  <span><b>Total duration:</b> {(this.state.spans[0].duration / 1000000).toFixed(2)}s</span>
-                  <br/>
-                  <span><b>URL:</b> <Link variant="primary"><a href={this.state.spans[0].url}>{this.state.spans[0].url}</a></Link></span>
-                </p>
-                <Table>
+                <Content>
+                  <p>
+                    <span><b>Trace start date (local):</b> {this.viewLocaleDate(this.state.spans[0].date)}</span>
+                    <br/>
+                    <span><b>Trace start time (local):</b> {this.viewLocaleTime(this.state.spans[0].date)}</span>
+                    <br/>
+                    <span><b>Total duration:</b> {(this.state.spans[0].duration / 1000000).toFixed(2)}s</span>
+                    <br/>
+                    <span><b>URL:</b> <Link variant="primary"><a href={this.state.spans[0].url}>{this.state.spans[0].url}</a></Link></span>
+                  </p>
+                </Content>
+                <Table aria-label="Results">
                   <TableHeader>
-                    <Column>Time (UTC)</Column>
-                    <Column>Action</Column>
-                    <Column>Activation ID</Column>
-                    <Column>Path</Column>
-                    <Column>Status</Column>
-                    <Column><img className="custom-icon" src={espagonLogo} alt="View in Epsagon" title="View in Epsagon"/></Column>
-                    <Column><img className="custom-icon" src={coralogixLogo} alt="View in Coralogix" title="View in Coralogix"/></Column>
-                    <Column>Response</Column>
-                    <Column>Logs</Column>
-                    <Column>Replay</Column>
-                    <Column>Data</Column>
+                    <Column width="7%">Time (UTC)</Column>
+                    <Column width="25%">Action</Column>
+                    <Column width="16%">Activation ID</Column>
+                    <Column width="12%">Path</Column>
+                    <Column width="4%">Status</Column>
+                    <Column width="4%"><img className="custom-icon" src={espagonLogo} alt="View in Epsagon" title="View in Epsagon"/></Column>
+                    <Column width="4%"><img className="custom-icon" src={coralogixLogo} alt="View in Coralogix" title="View in Coralogix"/></Column>
+                    <Column width="7%">Response</Column>
+                    <Column width="7%">Logs</Column>
+                    <Column width="7%">Replay</Column>
+                    <Column width="7%">Data</Column>
                   </TableHeader>
                   <TableBody>
                     { this.state.spans.map((span, index) => {
@@ -322,12 +322,12 @@ export default class App extends React.Component {
                       }
                       return <Row key={index} className={errorClassName}>
                         <Cell>{this.viewUTCTime(span.date)}</Cell>
-                        <Cell className="spanNameCell">
+                        <Cell UNSAFE_className="spanNameCell">
                           <span className="indentOffset">{this.createIndent(span.level)}</span>
-                          <span className="spanName">{span.invokedName || span.name}</span>
+                          <span className="spanName" title={span.invokedName || span.name}>{span.invokedName || span.name}</span>
                         </Cell>
                         <Cell>{span.activationId}</Cell>
-                        <Cell className="pathCell" title={span.path}>{span.path}</Cell>
+                        <Cell><span className="pathCell" title={span.path}>{span.path}</span></Cell>
                         <Cell>{span.status}</Cell>
                         <Cell>  { span.spanId &&
                           <a href={espagonLink} target="_new"><img className="custom-icon" src={espagonLogo} alt="View in Epsagon" title="View in Epsagon"/></a>
@@ -335,13 +335,16 @@ export default class App extends React.Component {
                         </Cell>
                         <Cell><a href={coralogixLink} target="_new"><img className="custom-icon" src={coralogixLogo} alt="View in Coralogix" title="View in Coralogix"/></a></Cell>
                         <Cell> { hasResponse &&
-                            <DialogTrigger placement="left">
+                            <DialogTrigger placement="left" type="modal">
                               <ActionButton>Response</ActionButton>
-                              <Dialog title="Action response" variant="default">
-                                { this.getViewResponse(span.response) }
+                              <Dialog>
+                                <Content>{ this.getViewResponse(span.response) }</Content>
+                                <Button variant="cta" onPress={close} autoFocus>
+                                  Close
+                                </Button>
                               </Dialog>
                             </DialogTrigger>
-                          }
+                        }
                         </Cell>
                         <Cell> { hasLogs && 
                           <DialogTrigger placement="left">
@@ -350,10 +353,10 @@ export default class App extends React.Component {
                               { this.getViewLogs(span.logs) }
                             </Dialog>
                           </DialogTrigger>
-                          }
+                        }
                         </Cell>
                         <Cell> { canReplay && 
-                          <Button label="Replay" variant="primary" onClick={() => { window.open(replayURL)} }/>
+                          <ActionButton onClick={() => { window.open(replayURL)} }>Replay</ActionButton>
                         }
                         </Cell>
                         <Cell> { hasData && 
@@ -363,7 +366,7 @@ export default class App extends React.Component {
                               { this.getViewParams(span.data) }
                             </Dialog>
                           </DialogTrigger>
-                          }
+                        }
                         </Cell>
                       </Row>
                     })}
