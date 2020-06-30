@@ -325,9 +325,9 @@ export default class App extends React.Component {
                             replayURL = span.url
                           }
                         }
-                        return <Row key={index} className={errorClassName}>
+                        return <Row key={index} UNSAFE_className={errorClassName}>
                           <Cell>{this.viewUTCTime(span.date)}</Cell>
-                          <Cell UNSAFE_className="spanNameCell">
+                          <Cell>
                             <span className="indentOffset">{this.createIndent(span.level)}</span>
                             <span className="spanName" title={span.invokedName || span.name}>{span.invokedName || span.name}</span>
                           </Cell>
