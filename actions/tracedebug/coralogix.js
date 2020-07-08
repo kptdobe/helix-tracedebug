@@ -201,6 +201,7 @@ async function getRootSpan(id, token, logger) {
     if (hits.length > 0) {
         let pivotActivationId;
         let root;
+        let name;
 
         hits.forEach((hit) => {
             const s = hit._source;
@@ -213,6 +214,7 @@ async function getRootSpan(id, token, logger) {
                         pivotActivationId = s.ow.activationId;
                     }
                 }
+                name = root.cdn.url
             } else {
                 // use pivot activationId from non fastly log, i.e the dispatch log
                 pivotActivationId = s.ow.activationId;
@@ -232,7 +234,7 @@ async function getRootSpan(id, token, logger) {
             duration: root.cdn.time.elapsed,
             // error: span.error,
             activationId: root.ow.activationId !== '(null)' ? root.ow.activationId : null,
-            name: root.coralogix.metadata.applicationName,
+            name: name || root.coralogix.metadata.applicationName,
             // operation: span.operation_name,
             // spanId: span.span_id,
             timestamp: root.cdn.time.start_msec,
