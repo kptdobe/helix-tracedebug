@@ -110,7 +110,11 @@ function constructSpans(data) {
                     const version = tags['openwhisk.action.version']
                     invokedName = `/${namespace ? namespace + '/' : ''}${package ? package + '/' : ''}${actionName}${version ? '@' + version : ''}`
                 } else {
-                    actionName = container.name
+                    if (container.type === 'fastly') {
+                        actionName = span.tags.vcl
+                    } else {
+                        actionName = container.name
+                    }
                 }
 
                 let activationId = tags['openwhisk.action.activation_id']
