@@ -1,14 +1,18 @@
 {
-  "cna": {},
-  "services": [
+  services: [
     {
-      "code": "AdobeTargetSDK"
+      code: "AdobeTargetSDK"
     },
     {
-      "code": "AdobeAnalyticsSDK"
+      code: "AdobeAnalyticsSDK"
     },
     {
-      "code": "CampaignSDK"
+      code: "CampaignSDK"
     }
-  ]
+  ],
+  ims: {
+    config: {
+      current: "cli"
+    }
+  }
 }
