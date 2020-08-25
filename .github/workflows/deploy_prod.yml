@@ -31,6 +31,7 @@ jobs:
           os: ${{ matrix.os }}
           command: build
           AIO_RUNTIME_NAMESPACE: ${{ secrets.AIO_RUNTIME_NAMESPACE_PROD }}
+        env:
           EPSAGON_API_TOKEN: ${{ secrets.EPSAGON_API_TOKEN }}
           CORALOGIX_API_TOKEN: ${{ secrets.CORALOGIX_API_TOKEN }}
       - name: Deploy
@@ -40,5 +41,6 @@ jobs:
           command: deploy
           AIO_RUNTIME_AUTH: ${{ secrets.AIO_RUNTIME_AUTH_PROD }}
           AIO_RUNTIME_NAMESPACE: ${{ secrets.AIO_RUNTIME_NAMESPACE_PROD }}
+        env:
           EPSAGON_API_TOKEN: ${{ secrets.EPSAGON_API_TOKEN }}
           CORALOGIX_API_TOKEN: ${{ secrets.CORALOGIX_API_TOKEN }}
