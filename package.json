@@ -1,8 +1,9 @@
 {
   "name": "helix-tracedebug",
-  "version": "0.0.24",
+  "version": "1.0.0",
   "dependencies": {
     "@adobe/aio-sdk": "^2.0.0",
+    "@adobe/exc-app": "^0.2.20",
     "@react/react-spectrum": "^2.29.0",
     "chart.js": "^2.9.3",
     "core-js": "^3.6.4",

@@ -5,11 +5,11 @@ packages:
       tracedebug:
         function: actions/tracedebug/index.js
         web: 'yes'
-        runtime: 'nodejs:10'
+        runtime: 'nodejs:12'
         inputs:
           LOG_LEVEL: debug
           EPSAGON_API_TOKEN: $EPSAGON_API_TOKEN
           CORALOGIX_API_TOKEN: $CORALOGIX_API_TOKEN
         annotations:
-          require-adobe-auth: false
+          require-adobe-auth: true
           final: true
