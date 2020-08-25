@@ -218,15 +218,18 @@ export default class App extends React.Component {
                 </View>
               </Form>
 
-              <Well>
-                Notes:
-                <ul>
-                  <li>the search is limited to the last 7 days</li>
-                  <li>URL longer than 70 characters cannot be searched by strict equality, they are then searched by "starts with url" - you may have unexpected results</li>
-                </ul>
-              </Well>
               <br/>
-              <br/>
+
+              {
+                !this.state.loading && !this.state.errorMsg && !this.state.response &&
+                <Well>
+                  Notes:
+                  <ul>
+                    <li>the search is limited to the last 7 days</li>
+                    <li>URL longer than 70 characters cannot be searched by strict equality, they are then searched by "starts with url" - you may have unexpected results</li>
+                  </ul>
+                </Well>
+              }
 
               {
                 this.state.loading && 
