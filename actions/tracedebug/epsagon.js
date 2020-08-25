@@ -106,9 +106,9 @@ function constructSpans(data) {
                 let invokedName = ''
                 if (actionName) {
                     const namespace = tags['openwhisk.namespace']
-                    const package = tags['openwhisk.action.package']
+                    const actionPackage = tags['openwhisk.action.package']
                     const version = tags['openwhisk.action.version']
-                    invokedName = `/${namespace ? namespace + '/' : ''}${package ? package + '/' : ''}${actionName}${version ? '@' + version : ''}`
+                    invokedName = `/${namespace ? namespace + '/' : ''}${actionPackage ? actionPackage + '/' : ''}${actionName}${version ? '@' + version : ''}`
                 } else {
                     if (container.type === 'fastly') {
                         actionName = span.tags.vcl
