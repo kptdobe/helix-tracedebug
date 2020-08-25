@@ -8,27 +8,30 @@ import ErrorBoundary from 'react-error-boundary'
 
 import moment from 'moment'
 
-import Button from '@react/react-spectrum/Button'
-import Heading from '@react/react-spectrum/Heading'
-import InputGroup from '@react/react-spectrum/InputGroup'
-import Label from '@react/react-spectrum/Label'
-import Link from '@react/react-spectrum/Link'
-import OverlayTrigger from '@react/react-spectrum/OverlayTrigger'
-import Popover from '@react/react-spectrum/Popover'
-import {Table, TR, TD, TH, THead, TBody} from '@react/react-spectrum/Table'
-import Textfield from '@react/react-spectrum/Textfield'
-import Tooltip from '@react/react-spectrum/Tooltip'
-import Wait from '@react/react-spectrum/Wait'
-
-// import ReactJson from 'react-json-view'
+import { Provider } from '@react-spectrum/provider'
+import { theme } from '@react-spectrum/theme-default'
+import { Button, ActionButton, ButtonGroup } from '@react-spectrum/button'
+import { Heading } from '@react-spectrum/text'
+import { Link } from '@react-spectrum/link'
+import { Table, Row, Cell, TableBody, TableHeader, Column } from '@react-spectrum/table'
+import { TextField } from '@react-spectrum/textfield'
+import { Form } from '@react-spectrum/form'
+import { ProgressCircle } from '@react-spectrum/progress'
+import { Well } from '@react-spectrum/well'
+import { DialogTrigger, Dialog } from '@react-spectrum/dialog'
+import { IllustratedMessage } from '@react-spectrum/illustratedmessage'
+import { Content, View } from '@react-spectrum/view'
+import { Divider } from '@react-spectrum/divider'
+import { Flex } from '@react-spectrum/layout'
 
 import './App.css'
 
+import NotFound from '@spectrum-icons/illustrations/NotFound';
+import Error from '@spectrum-icons/illustrations/Error';
 import espagonLogo from '../resources/epsagon.svg'
 import coralogixLogo from '../resources/coralogix.png'
 
 import { actionWebInvoke } from './utils'
-import actions from './config.json'
 
 /* Here is your entry point React Component, this class has access to the Adobe Experience Cloud Shell runtime object */
 
@@ -52,7 +55,7 @@ export default class App extends React.Component {
     this.componentDidMount = this.componentDidMount.bind(this)
 
     this.state = {
-      id: new URL(window.location.href).hash.slice(1)
+    //   id: new URL(window.location.href).hash.slice(1)
     }
 
     console.debug('runtime object:', this.props.runtime)
@@ -68,14 +71,15 @@ export default class App extends React.Component {
   }
 
   async invoke (action, params) {
-    this.setState({ loading: true })
+    this.setState({ loading: true, response: null, errorMsg: null, spans: null })
     // set the authorization header and org from the ims props object
     const headers = {}
-    if (this.props.ims.token) {
+    // set the authorization header and org from the ims props object
+    if (this.props.ims.token && !headers.authorization) {
       headers.authorization = 'Bearer ' + this.props.ims.token
     }
-    if (this.props.ims.org) {
-      headers['x-org-id'] = this.props.ims.org
+    if (this.props.ims.org && !headers['x-gw-ims-org-id']) {
+      headers['x-gw-ims-org-id'] = this.props.ims.org
     }
     try {
       // invoke backend action
@@ -101,9 +105,9 @@ export default class App extends React.Component {
 
   handleIdChange(value) {
     this.setState({'id': value})
-    const u = new URL(window.location.href)
-    u.hash = value
-    window.location.href = u.href
+    // const u = new URL(window.location.href)
+    // u.hash = value
+    // window.location.href = u.href
   }
 
   handleKeyDown(evt) {
@@ -171,9 +175,9 @@ export default class App extends React.Component {
 
   componentDidMount() {
     console.log('componentDidMount', this.state.id)
-    if (this.state.id) {
-      this.search()
-    }
+    // if (this.state.id) {
+    //   this.search()
+    // }
   }
 
   viewLocaleTime(date) {
@@ -200,174 +204,216 @@ export default class App extends React.Component {
     return (
       // ErrorBoundary wraps child components to handle eventual rendering errors
       <ErrorBoundary onError={ this.onError } FallbackComponent={ this.fallbackComponent } >
-        <div className="page-content">
-          <div className="main">
-            <Heading>Helix, trace and debug</Heading>
-            <p>Welcome to "Helix, trace and debug" which helps you to trace your activations.</p>
+        <Provider theme={theme} colorScheme="dark" scale="medium">
+          <main>
+            <article>
+              <Heading level={1}>Helix, trace and debug</Heading>
+              <Content>Welcome to "Helix, trace and debug" which helps you to trace your activations.</Content>
 
-            <Heading variant="subtitle1">Enter a activation id, an already requested url or a CDN request id</Heading>
-            <InputGroup>
-              <Label>Activation ID or URL or CDN-Request-Id</Label>
-              <Textfield id="id" name="id" value={this.state.id} onChange={this.handleIdChange} onKeyDown={this.handleKeyDown}/>
-              <Button onClick={ this.search.bind(this) }>Search</Button>
-            </InputGroup>
+              <Form>
+                <View>
+                  <Content>Enter an Activation ID, an already requested URL or a CDN-Request-Id:</Content>
+                  <TextField width="size-3600" id="id" name="id" aria-label="Enter an Activation ID, an already requested URL or a CDN-Request-Id" value={this.state.id} onChange={this.handleIdChange} onKeyDown={this.handleKeyDown}/>
+                  <Button marginStart="size-150" maxWidth="size-1000" onClick={ this.search.bind(this) } variant="cta">Search</Button>
+                </View>
+              </Form>
+
+              <br/>
+
+              {
+                !this.state.loading && !this.state.errorMsg && !this.state.response &&
+                <Well>
+                  Notes:
+                  <ul>
+                    <li>the search is limited to the last 7 days</li>
+                    <li>URL longer than 70 characters cannot be searched by strict equality, they are then searched by "starts with url" - you may have unexpected results</li>
+                  </ul>
+                </Well>
+              }
+
+              {
+                this.state.loading && 
+                <IllustratedMessage>
+                  <ProgressCircle aria-label="Loading…" size="L" isIndeterminate />
+                </IllustratedMessage>
+              }
+
+              { 
+                !this.state.errorMsg && this.state.response && (!this.state.spans || this.state.spans.length === 0) &&
+                  <IllustratedMessage>
+                    <NotFound />
+                    <Heading>No Results</Heading>
+                    <Content>Try another search</Content>
+                  </IllustratedMessage>
+              }
+
               { this.state.errorMsg &&
-                <Tooltip variant="error">
-                  Failure! See the error in your browser console.
-                </Tooltip>
+                  <IllustratedMessage>
+                    <Error />
+                    <Heading>Error</Heading>
+                    <Content>Failure! See the error in your browser console.</Content>
+                </IllustratedMessage>
               }
 
-              { !this.state.errorMsg && this.state.response && this.state.spans && this.state.spans.length > 0 &&
-                <Tooltip variant="success">
-                  We found some info for you.
-                </Tooltip>
-              }
+              {
+                this.state.spans && this.state.spans.length > 0 &&
+                <div>
+                  <Content>
+                    <p>
+                      <span><b>Trace start date (local):</b> {this.viewLocaleDate(this.state.spans[0].date)}</span>
+                      <br/>
+                      <span><b>Trace start time (local):</b> {this.viewLocaleTime(this.state.spans[0].date)}</span>
+                      <br/>
+                      <span><b>Total duration:</b> {(this.state.spans[0].duration / 1000000).toFixed(2)}s</span>
+                      <br/>
+                      <span><b>URL:</b> <Link variant="primary"><a href={this.state.spans[0].url}>{this.state.spans[0].url}</a></Link></span>
+                    </p>
+                  </Content>
+                  <Table aria-label="Results">
+                    <TableHeader>
+                      <Column width="7%">Time (UTC)</Column>
+                      <Column width="25%">Action</Column>
+                      <Column width="16%">Activation ID</Column>
+                      <Column width="12%">Path</Column>
+                      <Column width="4%">Status</Column>
+                      <Column width="4%"><img className="custom-icon" src={espagonLogo} alt="View in Epsagon" title="View in Epsagon"/></Column>
+                      <Column width="4%"><img className="custom-icon" src={coralogixLogo} alt="View in Coralogix" title="View in Coralogix"/></Column>
+                      <Column width="7%">Response</Column>
+                      <Column width="7%">Logs</Column>
+                      <Column width="7%">Replay</Column>
+                      <Column width="7%">Data</Column>
+                    </TableHeader>
+                    <TableBody>
+                      { this.state.spans.map((span, index) => {
+                        if (span.invisible) return;
+                        const espagonLink = `https://dashboard.epsagon.com/spans/${span.spanId}`
+                        const coralogixLink = `https://helix.coralogix.com/#/query/logs?query=${span.activationId || this.state.id}`
 
-              { !this.state.errorMsg && this.state.response && (!this.state.spans || this.state.spans.length === 0) &&
-                <Tooltip variant="info">
-                  We did not find anything for activation {this.state.id}.
-                </Tooltip>
-              }
-              <p>Notes:</p>
-              <ul>
-                <li>the search is limited to the last 7 days</li>
-                <li>URL longer than 70 characters cannot be searched by strict equality, they are then searched by "starts with url" - you may have unexpected results</li>
-              </ul>
+                        const hasData = span.data && Object.keys(span.data).length > 0
+                        const dataButtonLabel = `Data`
 
-            {
-              this.state.loading && 
-                <Wait centered size="L" />
-            }
+                        const hasResponse = !!span.response
 
-            {
-              this.state.spans && this.state.spans.length > 0 &&
-              <div>
-                <br/>
-                <p>
-                  <span><b>Trace start date (local):</b> {this.viewLocaleDate(this.state.spans[0].date)}</span>
-                  <br/>
-                  <span><b>Trace start time (local):</b> {this.viewLocaleTime(this.state.spans[0].date)}</span>
-                  <br/>
-                  <span><b>Total duration:</b> {(this.state.spans[0].duration / 1000000).toFixed(2)}s</span>
-                  <br/>
-                  <span><b>URL:</b> <Link href={this.state.spans[0].url}>{this.state.spans[0].url}</Link></span>
-                </p>
-                <Table>
-                  <THead>
-                    <TH>Time (UTC)</TH>
-                    <TH>Action</TH>
-                    <TH>Activation ID</TH>
-                    <TH>Path</TH>
-                    <TH>Status</TH>
-                    <TH><img className="custom-icon" src={espagonLogo} alt="View in Epsagon" title="View in Epsagon"/></TH>
-                    <TH><img className="custom-icon" src={coralogixLogo} alt="View in Coralogix" title="View in Coralogix"/></TH>
-                    <TH>Response</TH>
-                    <TH>Logs</TH>
-                    <TH>Replay</TH>
-                    <TH>Data</TH>
-                  </THead>
-                  <TBody>
-                    { this.state.spans.map((span, index) => {
-                      if (span.invisible) return;
-                      const espagonLink = `https://dashboard.epsagon.com/spans/${span.spanId}`
-                      const coralogixLink = `https://helix.coralogix.com/#/query/logs?query=${span.activationId || this.state.id}`
+                        const hasLogs = span.logs && span.logs.length > 0
+                        const logsButtonLabel = `${hasLogs ? span.logs.length : ''} logs`
 
-                      const hasData = span.data && Object.keys(span.data).length > 0
-                      const dataButtonLabel = `Data`
+                        const errorClassName = span.error || span.status >= 500 ? 'error' : ''
 
-                      const hasResponse = !!span.response
-
-                      const hasLogs = span.logs && span.logs.length > 0
-                      const logsButtonLabel = `${hasLogs ? span.logs.length : ''} logs`
-
-                      const errorClassName = span.error || span.status >= 500 ? 'error' : ''
-
-                      let replayURL = ''
-                      let canReplay = false
-                      if (span.host) {
-                        if (span.invokedName) {
-                          canReplay = true
-                          const u = new URL(`${span.host}/api/v1/web${span.invokedName}`)
-                          if (span.params) {
-                            for(let p in span.params) {
-                              u.searchParams.append(p, span.params[p]);
-                            }
-                          }
-                          replayURL = u.toString();
-                        } else {
-                          if (span.path) {
+                        let replayURL = ''
+                        let canReplay = false
+                        if (span.host) {
+                          if (span.invokedName) {
                             canReplay = true
-                            const u = new URL(`${span.host.indexOf('https') === 0 ? span.host : 'https://' + span.host}${span.path}`)
+                            const u = new URL(`${span.host}/api/v1/web${span.invokedName}`)
                             if (span.params) {
                               for(let p in span.params) {
                                 u.searchParams.append(p, span.params[p]);
                               }
                             }
                             replayURL = u.toString();
+                          } else {
+                            if (span.path) {
+                              canReplay = true
+                              const u = new URL(`${span.host.indexOf('https') === 0 ? span.host : 'https://' + span.host}${span.path}`)
+                              if (span.params) {
+                                for(let p in span.params) {
+                                  u.searchParams.append(p, span.params[p]);
+                                }
+                              }
+                              replayURL = u.toString();
+                            }
+                          }
+                        } else {
+                          if (span.name === 'fastly') {
+                            canReplay = true
+                            replayURL = span.url
                           }
                         }
-                      } else {
-                        if (span.name === 'fastly') {
-                          canReplay = true
-                          replayURL = span.url
-                        }
-                      }
-                      return <TR key={index} className={errorClassName}>
-                        <TD>{this.viewUTCTime(span.date)}</TD>
-                        <TD className="spanNameCell">
-                          <span className="indentOffset">{this.createIndent(span.level)}</span>
-                          <span className="spanName">{span.invokedName || span.name}</span>
-                        </TD>
-                        <TD>{span.activationId}</TD>
-                        <TD className="pathCell" title={span.path}>{span.path}</TD>
-                        <TD>{span.status}</TD>
-                        <TD>  { span.spanId &&
-                          <a href={espagonLink} target="_new"><img className="custom-icon" src={espagonLogo} alt="View in Epsagon" title="View in Epsagon"/></a>
-                        }
-                        </TD>
-                        <TD><a href={coralogixLink} target="_new"><img className="custom-icon" src={coralogixLogo} alt="View in Coralogix" title="View in Coralogix"/></a></TD>
-                        <TD> { hasResponse &&
-                            <OverlayTrigger placement="left">
-                              <Button label="Response" variant="primary" />
-                              <Popover title="Action response" variant="default">
-                                { this.getViewResponse(span.response) }
-                              </Popover>
-                            </OverlayTrigger>
+                        return <Row key={index} UNSAFE_className={errorClassName}>
+                          <Cell>{this.viewUTCTime(span.date)}</Cell>
+                          <Cell>
+                            <span className="indentOffset">{this.createIndent(span.level)}</span>
+                            <span className="spanName" title={span.invokedName || span.name}>{span.invokedName || span.name}</span>
+                          </Cell>
+                          <Cell>{span.activationId}</Cell>
+                          <Cell><span className="pathCell" title={span.path}>{span.path}</span></Cell>
+                          <Cell>{span.status}</Cell>
+                          <Cell>  { span.spanId &&
+                            <a href={espagonLink} target="_new"><img className="custom-icon" src={espagonLogo} alt="View in Epsagon" title="View in Epsagon"/></a>
                           }
-                        </TD>
-                        <TD> { hasLogs && 
-                          <OverlayTrigger placement="left">
-                            <Button label={logsButtonLabel} variant="primary" />
-                            <Popover title="Action logs" variant="default">
-                              { this.getViewLogs(span.logs) }
-                            </Popover>
-                          </OverlayTrigger>
+                          </Cell>
+                          <Cell><a href={coralogixLink} target="_new"><img className="custom-icon" src={coralogixLogo} alt="View in Coralogix" title="View in Coralogix"/></a></Cell>
+                          <Cell> { hasResponse &&
+                              <DialogTrigger type="fullscreenTakeover">
+                                <ActionButton>Response</ActionButton>
+                                {(close) => (
+                                  <Dialog>
+                                    <Heading>Response</Heading>
+                                    <Divider />
+                                    <Content>
+                                      <Flex direction="column">
+                                        <div>{ this.getViewResponse(span.response) }</div>
+                                        <Button alignSelf="center" variant="cta" onPress={close}>Close</Button>
+                                      </Flex>
+                                    </Content>
+                                  </Dialog>
+                                )}
+                              </DialogTrigger>
                           }
-                        </TD>
-                        <TD> { canReplay && 
-                          <Button label="Replay" variant="primary" onClick={() => { window.open(replayURL)} }/>
-                        }
-                        </TD>
-                        <TD> { hasData && 
-                          <OverlayTrigger placement="left">
-                            <Button label={dataButtonLabel} variant="primary" />
-                            <Popover title="Entry data" variant="default">
-                              { this.getViewParams(span.data) }
-                            </Popover>
-                          </OverlayTrigger>
+                          </Cell>
+                          <Cell> 
+                            { hasLogs && 
+                            <DialogTrigger type="fullscreenTakeover">
+                              <ActionButton>{logsButtonLabel}</ActionButton>
+                              {(close) => (
+                                <Dialog>
+                                  <Heading>Action logs</Heading>
+                                  <Divider />
+                                  <Content>
+                                    <Flex direction="column">
+                                      <div>{ this.getViewLogs(span.logs) }</div>
+                                      <Button alignSelf="center" variant="cta" onPress={close}>Close</Button>
+                                    </Flex>
+                                  </Content>
+                                </Dialog>
+                              )}
+                            </DialogTrigger>
                           }
-                        </TD>
-                      </TR>
-                    })}
-                  </TBody>
-                </Table>
-                <br/>
-                <br/>
-                {/* <ReactJson src={this.state.response.spans} /> */}
-              </div>
-            }
-          </div>
-        </div>
+                          </Cell>
+                          <Cell> { canReplay && 
+                            <ActionButton onClick={() => { window.open(replayURL)} }>Replay</ActionButton>
+                          }
+                          </Cell>
+                          <Cell> 
+                            { hasData && 
+                            <DialogTrigger type="fullscreenTakeover">
+                              <ActionButton>{dataButtonLabel}</ActionButton>
+                              {(close) => (
+                                <Dialog>
+                                  <Heading>Data</Heading>
+                                  <Divider />
+                                  <Content>
+                                    <Flex direction="column">
+                                      <div>{ this.getViewParams(span.data) }</div>
+                                      <Button alignSelf="center" variant="cta" onPress={close}>Close</Button>
+                                    </Flex>
+                                  </Content>
+                                </Dialog>
+                              )}
+                            </DialogTrigger>
+                          }
+                          </Cell>
+                        </Row>
+                      })}
+                    </TableBody>
+                  </Table>
+                  <br/>
+                  <br/>
+                </div>
+              }
+            </article>
+          </main>
+        </Provider>
       </ErrorBoundary>
     )
   }

@@ -1,14 +1,23 @@
 {
-  "cna": {},
-  "services": [
-    {
-      "code": "AdobeTargetSDK"
+  "project": {
+    "id": "4566206088344554210",
+    "name": "TraceDebug",
+    "title": "TraceDebug",
+    "org": {
+      "id": "325368",
+      "name": "Helix",
+      "ims_org_id": "FCD7731A5F05DAE40A495C05@AdobeOrg"
     },
-    {
-      "code": "AdobeAnalyticsSDK"
-    },
-    {
-      "code": "CampaignSDK"
+    "workspace": {
+      "id": "4566206088344558941",
+      "name": "AlexDev",
+      "title": "AlexDev",
+      "action_url": "https://325368-tracedebug-alexdev.adobeioruntime.net",
+      "app_url": "https://325368-tracedebug-alexdev.adobeio-static.net",
+      "details": {
+        "credentials": [],
+        "services": [],
+      }
     }
-  ]
+  }
 }
