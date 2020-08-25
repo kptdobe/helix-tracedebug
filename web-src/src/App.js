@@ -55,7 +55,7 @@ export default class App extends React.Component {
     this.componentDidMount = this.componentDidMount.bind(this)
 
     this.state = {
-      id: new URL(window.location.href).hash.slice(1)
+    //   id: new URL(window.location.href).hash.slice(1)
     }
 
     console.debug('runtime object:', this.props.runtime)
@@ -74,11 +74,12 @@ export default class App extends React.Component {
     this.setState({ loading: true, response: null, errorMsg: null, spans: null })
     // set the authorization header and org from the ims props object
     const headers = {}
-    if (this.props.ims.token) {
+    // set the authorization header and org from the ims props object
+    if (this.props.ims.token && !headers.authorization) {
       headers.authorization = 'Bearer ' + this.props.ims.token
     }
-    if (this.props.ims.org) {
-      headers['x-org-id'] = this.props.ims.org
+    if (this.props.ims.org && !headers['x-gw-ims-org-id']) {
+      headers['x-gw-ims-org-id'] = this.props.ims.org
     }
     try {
       // invoke backend action
@@ -104,9 +105,9 @@ export default class App extends React.Component {
 
   handleIdChange(value) {
     this.setState({'id': value})
-    const u = new URL(window.location.href)
-    u.hash = value
-    window.location.href = u.href
+    // const u = new URL(window.location.href)
+    // u.hash = value
+    // window.location.href = u.href
   }
 
   handleKeyDown(evt) {
@@ -174,9 +175,9 @@ export default class App extends React.Component {
 
   componentDidMount() {
     console.log('componentDidMount', this.state.id)
-    if (this.state.id) {
-      this.search()
-    }
+    // if (this.state.id) {
+    //   this.search()
+    // }
   }
 
   viewLocaleTime(date) {
