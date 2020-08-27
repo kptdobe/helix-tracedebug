@@ -52,10 +52,9 @@ export default class App extends React.Component {
 
     this.handleIdChange = this.handleIdChange.bind(this)
     this.handleKeyDown = this.handleKeyDown.bind(this)
-    this.componentDidMount = this.componentDidMount.bind(this)
-
+    
     this.state = {
-    //   id: new URL(window.location.href).hash.slice(1)
+      id: ''
     }
 
     console.debug('runtime object:', this.props.runtime)
@@ -105,9 +104,6 @@ export default class App extends React.Component {
 
   handleIdChange(value) {
     this.setState({'id': value})
-    // const u = new URL(window.location.href)
-    // u.hash = value
-    // window.location.href = u.href
   }
 
   handleKeyDown(evt) {
@@ -173,13 +169,6 @@ export default class App extends React.Component {
     this.invoke('tracedebug', { 'id': this.state.id})
   }
 
-  componentDidMount() {
-    console.log('componentDidMount', this.state.id)
-    // if (this.state.id) {
-    //   this.search()
-    // }
-  }
-
   viewLocaleTime(date) {
     return moment(date).format('HH:mm:ss.SSS')
   }
@@ -210,13 +199,11 @@ export default class App extends React.Component {
               <Heading level={1}>Helix, trace and debug</Heading>
               <Content>Welcome to "Helix, trace and debug" which helps you to trace your activations.</Content>
 
-              <Form>
-                <View>
-                  <Content>Enter an Activation ID, an already requested URL or a CDN-Request-Id:</Content>
-                  <TextField width="size-3600" id="id" name="id" aria-label="Enter an Activation ID, an already requested URL or a CDN-Request-Id" value={this.state.id} onChange={this.handleIdChange} onKeyDown={this.handleKeyDown}/>
-                  <Button marginStart="size-150" maxWidth="size-1000" onClick={ this.search.bind(this) } variant="cta">Search</Button>
-                </View>
-              </Form>
+              <View>
+                <Content>Enter an Activation ID, an already requested URL or a CDN-Request-Id:</Content>
+                <TextField width="size-3600" id="id" name="id" aria-label="Enter an Activation ID, an already requested URL or a CDN-Request-Id" value={this.state.id} onChange={this.handleIdChange} onKeyDown={this.handleKeyDown}/>
+                <Button marginStart="size-150" maxWidth="size-1000" onClick={ this.search.bind(this) } variant="cta">Search</Button>
+              </View>
 
               <br/>
 

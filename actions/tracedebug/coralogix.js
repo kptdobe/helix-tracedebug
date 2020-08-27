@@ -105,7 +105,7 @@ async function findCDNRequestId(id, token, logger) {
             // keyword is limited to 70 characters, prefer standard search then but might lead to uncertain results
             query = `(cdn.url: "${href}")`
         }
-        query += ' AND (coralogix.metadata.applicationName: fastly)'
+        query += ' AND (coralogix.metadata.applicationName: fastly) AND (cdn.request.method: GET)'
 
         const hits = await runQuery({
             'query':{
