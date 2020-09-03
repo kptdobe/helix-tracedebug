@@ -7,14 +7,11 @@ import PropTypes from 'prop-types'
 
 import moment from 'moment'
 
-import { Provider } from '@react-spectrum/provider'
-import { theme } from '@react-spectrum/theme-default'
-import { Button, ActionButton, ButtonGroup } from '@react-spectrum/button'
+import { Button, ActionButton } from '@react-spectrum/button'
 import { Heading } from '@react-spectrum/text'
 import { Link } from '@react-spectrum/link'
 import { Table, Row, Cell, TableBody, TableHeader, Column } from '@react-spectrum/table'
 import { TextField } from '@react-spectrum/textfield'
-import { Form } from '@react-spectrum/form'
 import { ProgressCircle } from '@react-spectrum/progress'
 import { Well } from '@react-spectrum/well'
 import { DialogTrigger, Dialog } from '@react-spectrum/dialog'
@@ -37,17 +34,6 @@ import { actionWebInvoke } from './utils'
 export default class Traces extends React.Component {
   constructor (props) {
     super(props)
-
-    // error handler on UI rendering failure
-    this.onError = (e, componentStack) => {}
-
-    // component to show if UI fails rendering
-    this.fallbackComponent = ({ componentStack, error }) => (
-      <React.Fragment>
-        <h1 style={{ textAlign: 'center', marginTop: '20px' }}>Something went wrong :(</h1>
-        <pre>{ componentStack + '\n' + error.message }</pre>
-      </React.Fragment>
-    )
 
     this.handleIdChange = this.handleIdChange.bind(this)
     this.handleKeyDown = this.handleKeyDown.bind(this)
@@ -186,10 +172,8 @@ export default class Traces extends React.Component {
 
   render () {
     return (
-      <article>
-        <Heading level={1}>Helix, trace and debug</Heading>
-        <Content>Welcome to "Helix, trace and debug" which helps you to trace your activations.</Content>
-
+      <div>
+        <Heading level={1}>Trace and debug</Heading>
         <View>
           <Content>Enter an Activation ID, an already requested URL or a CDN-Request-Id:</Content>
           <TextField width="size-3600" id="id" name="id" aria-label="Enter an Activation ID, an already requested URL or a CDN-Request-Id" value={this.state.id} onChange={this.handleIdChange} onKeyDown={this.handleKeyDown}/>
@@ -317,10 +301,10 @@ export default class Traces extends React.Component {
                     <Cell><span className="pathCell" title={span.path}>{span.path}</span></Cell>
                     <Cell>{span.status}</Cell>
                     <Cell>  { span.spanId &&
-                      <a href={espagonLink} target="_new"><img className="custom-icon" src={espagonLogo} alt="View in Epsagon" title="View in Epsagon"/></a>
+                      <a href={espagonLink} target="_blank"><img className="custom-icon" src={espagonLogo} alt="View in Epsagon" title="View in Epsagon"/></a>
                     }
                     </Cell>
-                    <Cell><a href={coralogixLink} target="_new"><img className="custom-icon" src={coralogixLogo} alt="View in Coralogix" title="View in Coralogix"/></a></Cell>
+                    <Cell><a href={coralogixLink} target="_blank"><img className="custom-icon" src={coralogixLogo} alt="View in Coralogix" title="View in Coralogix"/></a></Cell>
                     <Cell> { hasResponse &&
                         <DialogTrigger type="fullscreenTakeover">
                           <ActionButton>Response</ActionButton>
@@ -389,7 +373,7 @@ export default class Traces extends React.Component {
             <br/>
           </div>
         }
-      </article>
+      </div>
     )
   }
 }

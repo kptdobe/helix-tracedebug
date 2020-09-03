@@ -13,3 +13,13 @@ packages:
         annotations:
           require-adobe-auth: true
           final: true
+      accesslogs:
+        function: actions/accesslogs/index.js
+        web: 'yes'
+        runtime: 'nodejs:12'
+        inputs:
+          LOG_LEVEL: debug
+          CORALOGIX_API_TOKEN: $CORALOGIX_API_TOKEN
+        annotations:
+          require-adobe-auth: true
+          final: true
