@@ -52,6 +52,7 @@ export default class App extends React.Component {
 
     this.handleIdChange = this.handleIdChange.bind(this)
     this.handleKeyDown = this.handleKeyDown.bind(this)
+    this.componentDidMount = this.componentDidMount.bind(this)
     
     this.state = {
       id: new URL(window.location.href).hash.slice(1)
@@ -170,6 +171,13 @@ export default class App extends React.Component {
 
   search() {
     this.invoke('tracedebug', { 'id': this.state.id})
+  }
+
+  componentDidMount() {
+    console.log('componentDidMount', this.state.id)
+    if (this.state.id) {
+      this.search()
+    }
   }
 
   viewLocaleTime(date) {
