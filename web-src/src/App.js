@@ -54,7 +54,7 @@ export default class App extends React.Component {
     this.handleKeyDown = this.handleKeyDown.bind(this)
     
     this.state = {
-      id: ''
+      id: new URL(window.location.href).hash.slice(1)
     }
 
     console.debug('runtime object:', this.props.runtime)
@@ -104,6 +104,9 @@ export default class App extends React.Component {
 
   handleIdChange(value) {
     this.setState({'id': value})
+    const u = new URL(window.location.href)
+    u.hash = value
+    window.location.href = u.href
   }
 
   handleKeyDown(evt) {
