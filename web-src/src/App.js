@@ -111,7 +111,7 @@ export default class App extends React.Component {
   }
 
   handleKeyDown(evt) {
-      if (evt.charCode === 13) {
+    if (evt.charCode === 13) {
       // enter key pressed
       this.search()
     }
