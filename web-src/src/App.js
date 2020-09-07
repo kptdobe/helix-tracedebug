@@ -55,7 +55,7 @@ export default class App extends React.Component {
     this.componentDidMount = this.componentDidMount.bind(this)
     
     this.state = {
-      id: new URL(window.location.href).hash.slice(1)
+      id: new URL(window.location).searchParams.get('id')
     }
 
     console.debug('runtime object:', this.props.runtime)
@@ -105,13 +105,13 @@ export default class App extends React.Component {
 
   handleIdChange(value) {
     this.setState({'id': value})
-    const u = new URL(window.location.href)
-    u.hash = value
-    window.location.href = u.href
+    const params = new URL(window.location.href).searchParams;
+    params.set('id', value);
+    window.location.search = `?${params.toString()}`;
   }
 
   handleKeyDown(evt) {
-    if (evt.keyCode === 13) {
+      if (evt.charCode === 13) {
       // enter key pressed
       this.search()
     }
