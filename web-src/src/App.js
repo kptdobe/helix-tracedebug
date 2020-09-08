@@ -54,8 +54,18 @@ export default class App extends React.Component {
     this.handleKeyDown = this.handleKeyDown.bind(this)
     this.componentDidMount = this.componentDidMount.bind(this)
     
+    const url = new URL(window.location.href)
+    let id = url.searchParams.get('id')
+    if (id) {
+      url.searchParams.delete('id')
+      url.hash = id
+      window.location.href = url.href
+    } else {
+      id = url.hash.slice(1)
+    }
+
     this.state = {
-      id: new URL(window.location.href).hash.slice(1)
+      id
     }
 
     console.debug('runtime object:', this.props.runtime)
