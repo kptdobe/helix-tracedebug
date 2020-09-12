@@ -23,7 +23,7 @@
     "@spectrum-icons/illustrations": "3.1.0",
     "core-js": "3.6.5",
     "moment": "2.27.0",
-    "node-fetch": "2.6.0",
+    "node-fetch": "2.6.1",
     "react": "16.13.1",
     "react-dom": "16.13",
     "react-error-boundary": "1.2.5",
