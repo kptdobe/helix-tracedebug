@@ -8,21 +8,32 @@ import ErrorBoundary from 'react-error-boundary'
 
 import moment from 'moment'
 
-import { Provider } from '@react-spectrum/provider'
-import { theme } from '@react-spectrum/theme-default'
-import { Button, ActionButton, ButtonGroup } from '@react-spectrum/button'
-import { Heading } from '@react-spectrum/text'
-import { Link } from '@react-spectrum/link'
-import { Table, Row, Cell, TableBody, TableHeader, Column } from '@react-spectrum/table'
-import { TextField } from '@react-spectrum/textfield'
-import { Form } from '@react-spectrum/form'
-import { ProgressCircle } from '@react-spectrum/progress'
-import { Well } from '@react-spectrum/well'
-import { DialogTrigger, Dialog } from '@react-spectrum/dialog'
-import { IllustratedMessage } from '@react-spectrum/illustratedmessage'
-import { Content, View } from '@react-spectrum/view'
-import { Divider } from '@react-spectrum/divider'
-import { Flex } from '@react-spectrum/layout'
+import {
+  ActionButton,
+  Button,
+  Content,
+  defaultTheme as theme,
+  Dialog,
+  DialogTrigger,
+  Divider,
+  Flex,
+  Heading,
+  IllustratedMessage, 
+  Link,
+  ProgressCircle,
+  Provider,
+  TextField,
+  View,
+  Well 
+} from '@adobe/react-spectrum'
+import { 
+  Cell,
+  Column,
+  Row,
+  Table,
+  TableBody,
+  TableHeader
+} from '@react-spectrum/table'
 
 import './App.css'
 
