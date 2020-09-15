@@ -99,6 +99,7 @@ async function findCDNRequestId(id, token, logger) {
 
     let query
     if (isURL(id)) {
+        // try to find Fastly entry
         const href = new URL(id).href
         let query = `(cdn.url.keyword: "${href}")`
         if (href.length > 70) {
@@ -107,7 +108,7 @@ async function findCDNRequestId(id, token, logger) {
         }
         query += ' AND (coralogix.metadata.applicationName: fastly) AND (cdn.request.method: GET)'
 
-        const hits = await runQuery({
+        let hits = await runQuery({
             'query':{
                 'query_string':{
                     query
@@ -121,10 +122,38 @@ async function findCDNRequestId(id, token, logger) {
             'size': 1
         }, token, logger);
     
-        if (hits.length > 0) {
-            const s = hits[0]._source;
-            if (s.cdn && s.cdn.request) {
-                return s.cdn.request.id
+        let s = hits.length > 0 ? hits[0]._source : null
+        if (s && s.cdn && s.cdn.request) {
+            return s.cdn.request.id
+        } else {
+            //no Fastly entry, look for a dispatch
+            query = `(cdn.url.keyword: "${href}")`
+            if (href.length > 70) {
+                // keyword is limited to 70 characters, prefer standard search then but might lead to uncertain results
+                query = `(cdn.url: "${href}")`
+            }
+            query += ` AND _exists_: actionOptions.params.__ow_headers.x-cdn-request-id AND ow.actionName: "/helix/helix-services/dispatch*"`
+            hits = await runQuery({
+                'query':{
+                    'query_string':{
+                        query
+                    }
+                },
+                'sort': [{
+                    'coralogix.timestamp': {
+                        'order': 'desc'
+                    }
+                }],
+                'size': 1
+            }, token, logger);
+        
+            s = hits.length > 0 ? hits[0]._source : null
+            if (s && s.actionOptions && s.actionOptions.params && s.actionOptions.params.__ow_headers && s.actionOptions.params.__ow_headers['x-cdn-request-id']) {
+                // found a matching dispatch
+                return s.actionOptions.params.__ow_headers['x-cdn-request-id'];
+            } else {
+                // could not find url
+                return null;
             }
         }
     } else {
