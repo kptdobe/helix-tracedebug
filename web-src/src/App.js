@@ -222,7 +222,7 @@ export default class App extends React.Component {
 
               <View>
                 <Content>Enter an Activation ID, an already requested URL or a CDN-Request-Id:</Content>
-                <TextField width="size-3600" id="id" name="id" aria-label="Enter an Activation ID, an already requested URL or a CDN-Request-Id" value={this.state.id} onChange={this.handleIdChange} onKeyDown={this.handleKeyDown}/>
+                <TextField width="size-6000" id="id" name="id" aria-label="Enter an Activation ID, an already requested URL or a CDN-Request-Id" value={this.state.id} onChange={this.handleIdChange} onKeyDown={this.handleKeyDown}/>
                 <Button marginStart="size-150" maxWidth="size-1000" onClick={ this.search.bind(this) } variant="cta">Search</Button>
               </View>
 
