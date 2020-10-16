@@ -1,11 +1,11 @@
 {
   "name": "helix-tracedebug",
-  "version": "1.1.4",
+  "version": "1.2.0",
   "dependencies": {
     "@adobe/aio-sdk": "2.3.1",
     "@adobe/exc-app": "0.2.21",
     "@adobe/react-spectrum": "3.3.0",
-    "@react-spectrum/table": "3.0.0-alpha.6",
+    "@react-spectrum/table": "3.0.0-alpha.7",
     "@spectrum-icons/illustrations": "3.1.0",
     "core-js": "3.6.5",
     "moment": "2.28.0",
