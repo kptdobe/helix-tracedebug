@@ -157,7 +157,7 @@ async function findCDNRequestId(id, token, logger) {
             }
         }
     } else {
-        let query = `("${id}") AND (_exists_: ow.transactionId)`
+        let query = `("${id}") AND ((_exists_: ow.transactionId) OR (_exists_: ow.activationId))`
         let hits = await runQuery({
             'query':{
                 'query_string':{
@@ -174,8 +174,9 @@ async function findCDNRequestId(id, token, logger) {
     
         if (hits.length > 0) {
             const s = hits[0]._source;
-            if (s.ow && s.ow.transactionId) {
-                query = `((ow.transactionId: "${s.ow.transactionId}") AND (_exists_: actionOptions.params.__ow_headers.x-cdn-request-id)) OR ((ow.activationId: "${s.ow.activationId}") AND (_exists_: cdn.request.id))`
+            const id = s.ow ? s.ow.transactionId || s.ow.activationId : null;
+            if (id) {
+                query = `((ow.transactionId: "${id}") AND (_exists_: actionOptions.params.__ow_headers.x-cdn-request-id)) OR ((ow.activationId: "${id}") AND (_exists_: cdn.request.id))`
                 hits = await runQuery({
                     'query':{
                         'query_string':{
@@ -211,7 +212,9 @@ async function getRootSpan(id, token, logger) {
     if (!requestId) return null;
 
     // should give 2 types of results: the fastly entry and the dispatch activation logs
-    const query = `(cdn.request.id.keyword: "${requestId}") OR ((actionOptions.params.__ow_headers.x-cdn-request-id: "${requestId}") AND (ow.actionName: "/helix/helix-services/dispatch*"))`
+    const query = `(cdn.request.id.keyword: "${requestId}") OR 
+        ((actionOptions.params.__ow_headers.x-cdn-request-id: "${requestId}") AND (ow.actionName: "/helix/helix-services/dispatch*")) OR
+        ((ow.transactionId: "${requestId}") AND (ow.actionName: "/helix/helix-services/content-proxy*"))`
 
     const hits = await runQuery({
             'query':{
@@ -245,7 +248,7 @@ async function getRootSpan(id, token, logger) {
                 }
                 name = root.cdn.url
             } else {
-                // use pivot activationId from non fastly log, i.e the dispatch log
+                // use pivot activationId from non fastly log, i.e the dispatch or content-proxy log
                 pivotActivationId = s.ow.activationId;
             }
         })
