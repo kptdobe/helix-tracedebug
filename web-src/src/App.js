@@ -34,6 +34,8 @@ import ViewParameters from './ViewParameters'
 
 import { actionWebInvoke } from './utils'
 
+import { version } from '../../package.json'
+
 /* Here is your entry point React Component, this class has access to the Adobe Experience Cloud Shell runtime object */
 
 export default class App extends React.Component {
@@ -161,7 +163,7 @@ export default class App extends React.Component {
         <Provider theme={theme} colorScheme="dark" scale="medium">
           <main>
             <article>
-              <Heading level={1}>Helix, trace and debug</Heading>
+              <Heading level={1}>Helix, trace and debug, v{version}</Heading>
               <Content>Welcome to "Helix, trace and debug" which helps you to trace your activations.</Content>
 
               <View>
