@@ -14,11 +14,11 @@ function isURL(id) {
     }
   }
   
-  const PATTERN_CDNREQUESTID = /^[\dabcdef]{8}-[\dabcdef]{4}-[\dabcdef]{3}-[\dabcdef]{4}-[\dabcdef]{12}$/gm
+  const PATTERN_CDNREQUESTID = /^[\dabcdef]{8}-[\dabcdef]{4}-[\dabcdef]{3,4}-[\dabcdef]{4}-[\dabcdef]{12}$/gm
   
   function isCDNRequestId(id) {
-    // format like 12345678-90ab-cde-f123-4567890abcbc
-    return id.match(PATTERN_CDNREQUESTID)
+    // format like 12345678-90ab-acde-f123-4567890abcbc
+    return !!id.match(PATTERN_CDNREQUESTID)
   }
 
 module.exports = {
