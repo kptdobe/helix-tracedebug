@@ -37,8 +37,8 @@ jobs:
         env:
           AIO_RUNTIME_NAMESPACE: ${{ secrets.AIO_RUNTIME_NAMESPACE_STAGE }}
           AIO_RUNTIME_AUTH: ${{ secrets.AIO_RUNTIME_AUTH_STAGE }}
-          AIO_RUNTIME_NAMESPACE: ${{ secrets.AIO_RUNTIME_NAMESPACE_STAGE }}
-          AIO_RUNTIME_AUTH: ${{ secrets.AIO_RUNTIME_AUTH_STAGE }}
+          EPSAGON_API_TOKEN: ${{ secrets.EPSAGON_API_TOKEN }}
+          CORALOGIX_API_TOKEN: ${{ secrets.CORALOGIX_API_TOKEN }}
         uses: adobe/aio-apps-action@1.1.0
         with:
           os: ${{ matrix.os }}
