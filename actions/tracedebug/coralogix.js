@@ -97,7 +97,6 @@ async function findCDNRequestId(id, token, logger) {
         return id
     }
 
-    let query
     if (isURL(id)) {
         // try to find Fastly entry
         const href = new URL(id).href
@@ -203,7 +202,7 @@ async function findCDNRequestId(id, token, logger) {
         }
     }
 
-    return null
+    return null;
 }
 
 async function getRootSpan(id, token, logger) {
